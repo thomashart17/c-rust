@@ -11,8 +11,8 @@ rustup default 1.64.0
 
 To check that the update worked, run the following command to view the rustc version being used along with the version of LLVM being used:
 
-`
+```
 rustc --version --verbose
-`
+```
 
 

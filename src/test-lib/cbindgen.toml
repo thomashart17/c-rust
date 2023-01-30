@@ -1,0 +1,4 @@
+
+language = "C"
+
+include_guard = "TEST_LIB_H_"

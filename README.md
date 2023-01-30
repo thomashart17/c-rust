@@ -15,6 +15,38 @@ To check that the update worked, run the following command to view the rustc ver
 rustc --version --verbose
 ```
 
+## Generating C Headers From Rust Crate
+
+Use CBindGen to generate C header files for Rust library. First install CBindGen
+
+```
+cargo install -force cbindgen
+```
+
+Next create a cbindgen.toml file in the crate's directory. For the test lib in this project,
+
+```
+cd /project-path/src/test-lib
+touch cbindgen.toml
+```
+
+In this, add the following configuration for enabling C bindings and adding include gaurds
+
+``` toml
+language = "C"
+
+include_guard = "TEST_LIB_H_"
+```
+
+Once configured, inside the same directory, run the cbindgen command
+
+```
+cbindgen --config cbindgen.toml --crate test-lib --output ./inc/lib.h
+```
+
+This will generate a header file `lib.h` inside the crate's folder inside of a new `inc` folder.
+
+
 ## Building Rust in C
 
 Build toolchain derived from the [CMakeRust repo](https://github.com/Devolutions/CMakeRust)

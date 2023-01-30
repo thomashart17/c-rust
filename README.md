@@ -17,6 +17,8 @@ rustc --version --verbose
 
 ## Building Rust in C
 
+Build toolchain derived from the [CMakeRust repo](https://github.com/Devolutions/CMakeRust)
+
 To build:
 
 ```

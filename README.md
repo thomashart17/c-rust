@@ -15,4 +15,19 @@ To check that the update worked, run the following command to view the rustc ver
 rustc --version --verbose
 ```
 
+## Building Rust in C
 
+To build:
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+To run from the build directory
+
+```
+./src/main/c-rust
+```

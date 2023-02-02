@@ -65,3 +65,30 @@ To run from the build directory
 ```
 ./src/main/c-rust
 ```
+
+## LTO
+
+Link Time Optimization was based off the resource available [here](https://blog.llvm.org/2019/09/closing-gap-cross-language-lto-between.html).
+
+First ensure that clang is installed and based on LLVM version 14
+
+```
+sudo apt install clang-14
+```
+
+To check installation, run
+
+```
+clang-14 --version
+```
+
+Now to build the lto files
+
+```
+cd /project/dir/
+mkdir build
+cd build 
+rustc --crate-type=staticlib -O -C linker-plugin-lto -o libtest.a ../src/test-lib/src/lib.rs 
+clang-14 -flto -c -O2 ../src/main/main.c
+clang-14 -flto -O2 main.o -L . -ltest
+```

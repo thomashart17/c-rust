@@ -60,26 +60,37 @@ cmake ..
 make
 ```
 
-To run from the build directory
+To run the compiled file
 
 ```
+cd /project/dir/
+cd build 
 ./src/main/c-rust
 ```
+
+To find size of file
+
+```
+du -h src/main/
+```
+
+Result: `5.0 M`
 
 ## LTO
 
 Link Time Optimization was based off the resource available [here](https://blog.llvm.org/2019/09/closing-gap-cross-language-lto-between.html).
 
-First ensure that clang is installed and based on LLVM version 14
+First ensure that clang and lld are installed and based on LLVM version 14
 
 ```
-sudo apt install clang-14
+sudo apt install clang-14 lld-14
 ```
 
 To check installation, run
 
 ```
 clang-14 --version
+ld.lld-14 --version
 ```
 
 Now to build the lto files
@@ -90,5 +101,32 @@ mkdir build
 cd build 
 rustc --crate-type=staticlib -O -C linker-plugin-lto -o libtest.a ../src/test-lib/src/lib.rs 
 clang-14 -flto -c -O2 ../src/main/main.c
-clang-14 -flto -O2 main.o -L . -ltest
+clang-14 -flto -fuse-ld=lld-14 -O2 main.o -L . -ltest
+```
+
+To check size:
+
+```
+du -h a.out
+```
+
+Result: `4.7 M`
+
+# # Emitting LLVM IR
+
+For C code, run below and find it at `build/main.s`
+
+```
+cd /project/dir/
+mkdir build
+cd build 
+clang-14 -flto -c -O2 -emit-llvm -S ../src/main/main.c
+```
+
+For rust, run below and find it located in `src/test-lib/target/deps/test_lib*.ll`
+
+```
+cd /project/dir/
+cd src/test-lib
+cargo rustc -- --emit=llvm-ir
 ```

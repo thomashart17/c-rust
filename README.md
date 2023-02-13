@@ -112,6 +112,45 @@ du -h a.out
 
 Result: `4.7 M`
 
+To extract the bitcode out, run the last command as 
+
+```
+clang-14 -flto -fuse-ld=lld-14 -Wl,--plugin-opt=-lto-embed-bitcode=optimized -O2 main.o -L . -ltest
+```
+
+And extract the bitcode by:
+
+```
+objcopy a.out --dump-section .llvmbc=llvm.bc
+llvm-dis-14 llvm.bc
+```
+
+**NOTE** The above currently does not work with anything built by rustc. To test the process, use the `test.c` file:
+
+```
+clang-14 -flto -O2 -fuse-ld=lld-14 -Wl,--plugin-opt=-lto-embed-bitcode=optimized ../src/main/test.c
+objcopy a.out --dump-section .llvmbc=llvm.bc
+llvm-dis-14 llvm.bc
+head -5 llvm.ll
+```
+
+To try to fix the above problem, you can attempt to use the `-Zemit-thin-lto=no` flag. It is expiremental so a nightly build of rust must be used. The one used in the following demonstration is `nightly-2022-08-01`. Download using the steps described above in *Installing Rust with LLVM 14*.
+
+Now, follow the steps above but building the rust object file with the added flag.
+
+
+```
+cd /project/dir/
+mkdir build
+cd build 
+rustc --crate-type=staticlib -O -C linker-plugin-lto -Zemit-thin-lto=no -o libtest.a ../src/test-lib/src/lib.rs 
+clang-14 -flto -c -O2 ../src/main/main.c
+clang-14 -flto -fuse-ld=lld-14 -Wl,--plugin-opt=-lto-embed-bitcode=optimized -O2 main.o -L . -ltest
+objcopy a.out --dump-section .llvmbc=llvm.bc
+llvm-dis-14 llvm.bc
+```
+
+
 # # Emitting LLVM IR
 
 For C code, run below and find it at `build/main.s`

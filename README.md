@@ -64,7 +64,7 @@ echo -e "language = \"C\"\n\ninclude_guard = \"TEST_LIB_H_\"" > cbindgen.toml
 Once configured, inside the same directory, run the cbindgen command
 
 ```
-cbindgen --config cbindgen.toml --crate test-lib --output ./inc/lib.h
+cbindgen --config cbindgen.toml --output ./inc/lib.h
 ```
 
 This will generate a header file `lib.h` inside the crate's folder inside of a new `inc` folder.

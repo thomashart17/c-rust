@@ -1,4 +1,4 @@
 
 language = "C"
 
-include_guard = "TEST_LIB_H_"
+pragma_once = true

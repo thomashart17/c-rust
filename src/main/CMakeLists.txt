@@ -19,7 +19,7 @@ target_link_libraries(c-rust test-lib)
 target_link_options(c-rust PUBLIC
     "-flto"
     "-fuse-ld=lld-14"
-    "-Wl,--plugin-opt=-lto-embed-bitcode=optimized"
+    "-Wl,--plugin-opt=-lto-embed-bitcode=post-merge-pre-opt"
     "-O2"
 )
 

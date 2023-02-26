@@ -5,7 +5,7 @@ From the root of the project, run
 ```
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_C_COMPILER=clang-14 -DCMAKE_CXX_COMPILER=clang++-14 ../
 make
 ```
 

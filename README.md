@@ -1,4 +1,15 @@
-# Installing Rust with LLVM 14
+## Building
+
+From the root of the project, run
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+## Installing Rust with LLVM 14
 
 To start, install rustc and rustup from the [rust web site](https://www.rust-lang.org/tools/install)
 
@@ -17,7 +28,7 @@ rustc --version --verbose
 
 The rust library contained in this project contains a `rust-toolchain.toml` to set the version to that needed for compatability with LLVM 14 and the required rust compiler flags. If building the project with additional crates, ensure to add a `rust-toolchain.toml` file in the crate directory setting the default toolchain channel to `nightly-2022-08-01`.
 
-# Installing LLVM 14 Tools
+## Installing LLVM 14 Tools
 
 First ensure that clang and lld are installed and based on LLVM version 14
 
@@ -33,9 +44,9 @@ ld.lld-14 --version
 ```
 
 
-# Build Process
+## Build Process
 
-## Generating C Headers From Rust Crate
+### Generating C Headers From Rust Crate
 
 Use CBindGen to generate C header files for Rust library. First install CBindGen
 
@@ -59,11 +70,11 @@ cbindgen --config cbindgen.toml --crate test-lib --output ./inc/lib.h
 This will generate a header file `lib.h` inside the crate's folder inside of a new `inc` folder.
 
 
-## Building Rust in C
+### Building Rust in C
 
 The Rust in CMake build toolchain was derived from the [CMakeRust repo](https://github.com/Devolutions/CMakeRust)
 
-## LTO
+### LTO
 
 Link Time Optimization was based off the resource available [here](https://blog.llvm.org/2019/09/closing-gap-cross-language-lto-between.html).
 
@@ -72,7 +83,7 @@ Now to build the lto files
 
 When building for LTO, certain flags are set for the rust compiler `rustc`, the LLVM C frontend and the LLVM linker.
 
-### Rustc flags
+#### Rustc flags
 
 The flags needed for LTO with the rustc compiler are set in the `Cargo.toml` file and will be implemented by the cargo tool automatically. They are described here.
 
@@ -81,14 +92,14 @@ The flags needed for LTO with the rustc compiler are set in the `Cargo.toml` fil
 - `Clinker-plugin-lto` - Defers LTO optimization to the final linking stage. Passed as a profile `RUSTFLAG`.
 - `Zemit-thin-lto=no` - Experimental flag to running thin LTO pass when using the LTO linker plugin. Passed as a profile `RUSTFLAG`.
 
-### C flags
+#### C flags
 
 The flags needed for LTO with the clang compiler are passed as compiler arguments. They are described here.
 
 - `flto` - Defers LTO optimization to the final linking stage 
 - `O2` - Sets optimizer level 2
 
-### Compiler flags
+#### Compiler flags
 
 The flags needed for LTO with the lld linker are passed as arguments. They are described here
 
@@ -97,7 +108,7 @@ The flags needed for LTO with the lld linker are passed as arguments. They are d
 - `Wl,--plugin-opt=-lto-embed-bitcode=post-merge-pre-opt` - Embeds the post merge, pre optimized bitcode to the resultant binary file
 - `O2` - Set optimizer level 2
 
-## Outputting LLVM
+### Outputting LLVM
 
 Once the binary is generated, it is necessary to extract the bitcode from the file. This is done using the `llvm-objcopy-14` and `llvm-dis-14` tool
 

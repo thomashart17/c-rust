@@ -1,5 +1,5 @@
 
-add_executable(c-rust main.c)
+add_executable(c-rust main.c seahorn.c)
 
 # if(WIN32)
 #     target_link_libraries(helloworld test-lib ws2_32 userenv)

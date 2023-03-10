@@ -11,10 +11,12 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [profile.dev]
+panic = "abort"
 opt-level = 2
 rustflags = ["-Clinker-plugin-lto", "-Zemit-thin-lto=no"]
 
 [profile.release]
+panic = "abort"
 opt-level = 2
 rustflags = ["-Clinker-plugin-lto", "-Zemit-thin-lto=no"]
 

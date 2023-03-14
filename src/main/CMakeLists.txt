@@ -12,6 +12,7 @@ function(c_rust_llvm TARGET SRC_FILES)
         "-flto"
         "-fuse-ld=lld-14"
         "-Wl,--plugin-opt=-lto-embed-bitcode=post-merge-pre-opt"
+        "--target=x86_64-unknown-linux-gnu"
         "-O2"
     )
 

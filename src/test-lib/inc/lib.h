@@ -20,5 +20,3 @@ void modify_ptr(int32_t *n);
 int32_t enum_param_test(enum CEnum param);
 
 int32_t option_test(int32_t num);
-
-void test(void);

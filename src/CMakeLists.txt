@@ -68,9 +68,10 @@ endfunction()
 add_subdirectory(test-lib)
 
 # Add "Jobs"
-add_subdirectory(rust-jobs/add)
-add_subdirectory(rust-jobs/enum_as_param)
-add_subdirectory(rust-jobs/option)
-add_subdirectory(rust-jobs/pointer)
-add_subdirectory(rust-jobs/vec)
+# add_subdirectory(rust-jobs/add)
+# add_subdirectory(rust-jobs/enum_as_param)
+# add_subdirectory(rust-jobs/option)
+# add_subdirectory(rust-jobs/pointer)
+# add_subdirectory(rust-jobs/vec)
+add_subdirectory(rust-jobs/custom_vec)
 

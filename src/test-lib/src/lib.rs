@@ -4,6 +4,8 @@
 
 #![feature(lang_items)]
 
+mod custom_vec;
+
 use std::alloc::{GlobalAlloc, Layout};
 
 use libc::c_void;

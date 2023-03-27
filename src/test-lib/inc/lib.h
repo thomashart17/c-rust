@@ -20,3 +20,11 @@ void modify_ptr(int32_t *n);
 int32_t enum_param_test(enum CEnum param);
 
 int32_t option_test(int32_t num);
+
+bool create_push_pop(void);
+
+bool iter_test(void);
+
+bool test_drain(void);
+
+bool test_zst(void);

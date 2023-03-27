@@ -5,10 +5,10 @@
 #include "../test-lib/inc/lib.h"
 
 int main() {
-    int vec_len = vec_test();
-    printf("Vec len: %d\r\n", vec_len);
+    int option_res = option_test(10);
+    printf("Val: %d\r\n", option_res);
 
-    sassert(vec_len == 4);
+    sassert(option_res == 20);
 
     return 42;
 }

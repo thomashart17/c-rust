@@ -48,14 +48,15 @@ function(cargo_build)
     	set(CARGO_ARGS "build")
 		list(APPEND CARGO_ARGS "--target" ${LIB_TARGET})
 	endif()
+    
+    if(${LIB_BUILD_TYPE} STREQUAL "release")
+    list(APPEND CARGO_ARGS "--release")
+    endif()
+    
+    file(GLOB_RECURSE LIB_SOURCES "*.rs")
 
     list(APPEND CARGO_ARGS "-Zbuild-std=panic_abort,std")
-
-    if(${LIB_BUILD_TYPE} STREQUAL "release")
-        list(APPEND CARGO_ARGS "--release")
-    endif()
-
-    file(GLOB_RECURSE LIB_SOURCES "*.rs")
+    list(APPEND CARGO_ARGS "-Zbuild-std-features=panic_immediate_abort")
 
     set(CARGO_ENV_COMMAND ${CMAKE_COMMAND} -E env "CARGO_TARGET_DIR=${CARGO_TARGET_DIR}")
 

@@ -45,3 +45,9 @@ c_rust_llvm(vec "${VEC_SRC}")
 
 set(POINTER_SRC pointer.c seahorn.c)
 c_rust_llvm(pointer "${POINTER_SRC}")
+
+set(ENUM_AS_PARAM_SRC enum_as_param.c seahorn.c)
+c_rust_llvm(enum_as_param "${ENUM_AS_PARAM_SRC}")
+
+set(OPTION_SRC option.c seahorn.c)
+c_rust_llvm(option "${OPTION_SRC}")

@@ -2,6 +2,8 @@
 // #[no_mangle]
 // pub extern "C" fn _____(...) -> ... {}
 
+#![feature(lang_items)]
+
 use std::alloc::{GlobalAlloc, Layout};
 
 use libc::c_void;
@@ -23,6 +25,12 @@ unsafe impl GlobalAlloc for CAllocator {
         libc::free(_ptr as *mut c_void);
     }
 }
+
+// #[lang = "panic_fmt"]
+// #[no_mangle]
+// pub extern "C" fn panic_fmt() -> ! {
+//     loop {}
+// }
 
 #[no_mangle]
 pub extern "C" fn add(x: i32, y: i32) -> i32 {
@@ -47,5 +55,37 @@ pub extern "C" fn modify_ptr(n: *mut i32) {
     unsafe {
         *n = *n + 1;
         *n = *n + 1;
+    }
+}
+
+#[repr(C)]
+pub enum CEnum {
+    KValOne,
+    KValTwo,
+    KValThree
+}
+
+#[no_mangle]
+pub extern "C" fn enum_param_test(param: CEnum) -> i32 {
+    match param {
+        CEnum::KValOne => 101,
+        CEnum::KValTwo => 102,
+        CEnum::KValThree => 103
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn option_test(num: i32) -> i32 {
+    match double_if_even(num) {
+        Some(x) => x,
+        None => 0
+    }
+}
+
+fn double_if_even(num: i32) -> Option<i32> {
+    if num % 2 == 0 {
+        Some(2 * num)
+    } else {
+        None
     }
 }

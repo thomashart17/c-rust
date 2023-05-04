@@ -48,12 +48,15 @@ function(cargo_build)
     	set(CARGO_ARGS "build")
 		list(APPEND CARGO_ARGS "--target" ${LIB_TARGET})
 	endif()
-
+    
     if(${LIB_BUILD_TYPE} STREQUAL "release")
-        list(APPEND CARGO_ARGS "--release")
+    list(APPEND CARGO_ARGS "--release")
     endif()
-
+    
     file(GLOB_RECURSE LIB_SOURCES "*.rs")
+
+    list(APPEND CARGO_ARGS "-Zbuild-std=panic_abort,std")
+    list(APPEND CARGO_ARGS "-Zbuild-std-features=panic_immediate_abort")
 
     set(CARGO_ENV_COMMAND ${CMAKE_COMMAND} -E env "CARGO_TARGET_DIR=${CARGO_TARGET_DIR}")
 
@@ -62,7 +65,7 @@ function(cargo_build)
         COMMAND ${CARGO_ENV_COMMAND} ${CARGO_EXECUTABLE} ARGS ${CARGO_ARGS}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         DEPENDS ${LIB_SOURCES}
-        COMMENT "running cargo")
+        COMMENT "running cargo build")
     add_custom_target(${CARGO_NAME}_target ALL DEPENDS ${LIB_FILE})
     add_library(${CARGO_NAME} STATIC IMPORTED GLOBAL)
     add_dependencies(${CARGO_NAME} ${CARGO_NAME}_target)

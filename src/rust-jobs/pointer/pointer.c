@@ -2,7 +2,7 @@
 
 #include "seahorn/seahorn.h"
 
-#include "../test-lib/inc/lib.h"
+#include "inc/lib.h"
 
 int main() {
     int n = 0;

@@ -1,16 +1,34 @@
+function(generate_c_bindings TARGET)
+  add_custom_command(
+    OUTPUT ${TARGET}-bindings
+    COMMAND cbindgen ARGS --config ${CBINDGEN_TOML} --output ${CMAKE_CURRENT_BINARY_DIR}/inc/lib.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating C bindings for rust code for target ${TARGET}"
+  )
+
+  add_custom_target(${TARGET}-bindings-target ALL DEPENDS ${TARGET}-bindings)
+endfunction()
 
 function(c_rust_llvm TARGET SRC_FILES)
+    generate_c_bindings(${TARGET})
+
+    cargo_build(NAME ${TARGET}-lib)
+
     add_executable(${TARGET} ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/../seahorn.c)
 
     target_compile_options(${TARGET} PUBLIC 
         "-flto"
         "-O2"
+        "--target=x86_64-unknown-linux-gnu" # TODO: Set this dynamically
     )
 
-    target_link_libraries(${TARGET} test-lib)
+    target_link_libraries(${TARGET} ${TARGET}-lib )
 
     # TODO: Find a way to include seahorn.h more cleanly
-    target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..) 
+    target_include_directories(${TARGET} PUBLIC 
+      ${CMAKE_CURRENT_SOURCE_DIR}/..
+      ${CMAKE_CURRENT_BINARY_DIR}/
+    ) 
 
     target_link_options(${TARGET} PUBLIC
         "-flto"
@@ -64,14 +82,10 @@ function(sea_add_sat_test TARGET)
   add_test(NAME "${TARGET}_sat_test" COMMAND ${VERIFY_CMD} ${VERIFY_FLAGS} --expect=sat ${BC})
 endfunction()
 
-# Build rust helper library
-add_subdirectory(test-lib)
-
 # Add "Jobs"
-# add_subdirectory(rust-jobs/add)
-# add_subdirectory(rust-jobs/enum_as_param)
-# add_subdirectory(rust-jobs/option)
-# add_subdirectory(rust-jobs/pointer)
-# add_subdirectory(rust-jobs/vec)
-add_subdirectory(rust-jobs/custom_vec)
+add_subdirectory(rust-jobs/add)
+add_subdirectory(rust-jobs/vec)
+add_subdirectory(rust-jobs/enum-as-param)
+add_subdirectory(rust-jobs/option)
+add_subdirectory(rust-jobs/pointer)
 

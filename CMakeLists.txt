@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
 
 project(C-Rust)
 
@@ -19,6 +19,8 @@ set(LLVMIR_LINK ${SEA_LINK})
 set(SEA_OPT "${SEAHORN_ROOT}/bin/seaopt" CACHE STRING "Path to seaopt binary")
 set(SEA_PP "${SEAHORN_ROOT}/bin/seapp" CACHE STRING "Path to seapp binary")
 set(LLVMIR_OPT ${SEA_OPT})
+
+set(CBINDGEN_TOML ${CMAKE_SOURCE_DIR}/cbindgen.toml)
 
 set(AWS_C_COMMON_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/aws-c-common)
 

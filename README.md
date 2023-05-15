@@ -5,9 +5,17 @@ From the root of the project, run
 ```
 mkdir build
 cd build
-cmake -DCMAKE_C_COMPILER=clang-14 -DCMAKE_CXX_COMPILER=clang++-14 ../
-make
+cmake -DCMAKE_C_COMPILER=clang-14 -DCMAKE_CXX_COMPILER=clang++-14 ../ -GNinja -DSEAHORN_ROOT="~/SEAHORN/build/run"
+ninja
 ```
+If this does not work due to errors with cbindgen run
+```
+cargo install --force cbindgen
+export PATH=$PATH:~/.cargo/bin
+cd ..
+rm -rf build
+```
+Then repeat the steps above
 
 ## Installing Rust with LLVM 14
 
@@ -52,6 +60,7 @@ Use CBindGen to generate C header files for Rust library. First install CBindGen
 
 ```
 cargo install -force cbindgen
+export PATH=$PATH:~/.cargo/bin
 ```
 
 Next create a cbindgen.toml file in the crate's directory. For the test lib in this project,

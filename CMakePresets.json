@@ -1,0 +1,25 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 14
+    },
+    "configurePresets": [
+        {
+            "name": "default-jammy",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-14",
+                "CMAKE_CXX_COMPILER": "clang++-14",
+                "SEAHORN_ROOT": "~/seahorn/build/run"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default-jammy",
+            "configurePreset": "default-jammy"
+        }
+    ]
+}

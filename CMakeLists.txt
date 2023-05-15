@@ -13,7 +13,7 @@ include(CTest)
 
 enable_testing()
 
-set(SEAHORN_ROOT "/home/guybl/code_files/seahorn/SeaHorn-14.0.0-rc0-Linux-x86_64-RelWithDebInfo/" CACHE PATH "Path to SeaHorn installation")
+set(SEAHORN_ROOT "" CACHE PATH "Path to SeaHorn installation")
 set(SEA_LINK "llvm-link-14" CACHE STRING "Path to llvm-link")
 set(LLVMIR_LINK ${SEA_LINK})
 set(SEA_OPT "${SEAHORN_ROOT}/bin/seaopt" CACHE STRING "Path to seaopt binary")

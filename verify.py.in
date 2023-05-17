@@ -77,11 +77,17 @@ def main(argv):
             # try to guess input file from directory name
             if os.path.isdir(input_file):
                 fname = os.path.basename(input_file)
+
                 _input_file = os.path.join(input_file, 'llvm-ir', fname + '.ir',
                                            fname + '.ir.bc')
+                
                 if os.path.isfile(_input_file):
                     input_file = _input_file
-
+                    found = True
+                else:
+                    _input_file = os.path.join(input_file, fname + "_llvm.bc")
+                    if (os.path.isfile(_input_file)):
+                        input_file = _input_file
 
             file_dir = input_file
             file_dir = os.path.dirname(file_dir)

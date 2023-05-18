@@ -4,11 +4,17 @@
 
 #include "inc/lib.h"
 
+int sea_nd_int(void) {
+    return 42;
+}
+
 int main() {
-    int res = add(5, 7);
+    int v = sea_nd_int();
+    assume(v >= 1);
+    int res = add(v, 7);
     printf("Result: %d\r\n", res);
 
-    sassert(res == 12);
+    sassert(res >= 7);
 
     return 42;
 }

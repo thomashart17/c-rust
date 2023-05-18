@@ -7,3 +7,7 @@ void __VERIFIER_error (void) {
 void __VERIFIER_assume (int i) {
     return;
 }
+
+void __SEA_assume(bool b) {
+    return;
+}

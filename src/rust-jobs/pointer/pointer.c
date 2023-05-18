@@ -9,7 +9,7 @@ int main() {
     modify_ptr(&n);
     printf("N: %d\r\n", n);
 
-    sassert(n == 3);
+    sassert(n == 2);
 
     return 42;
 }

@@ -18,7 +18,8 @@ function(c_rust_llvm TARGET SRC_FILES)
 
     target_compile_options(${TARGET} PUBLIC 
         "-flto"
-        "-O2"
+        "-O1"
+        -Xclang -disable-llvm-optzns
         "--target=x86_64-unknown-linux-gnu" # TODO: Set this dynamically
     )
 
@@ -81,6 +82,11 @@ function(sea_add_sat_test TARGET)
   sea_get_file_name(BC ${TARGET}.ir)
   add_test(NAME "${TARGET}_sat_test" COMMAND ${VERIFY_CMD} ${VERIFY_FLAGS} --expect=sat ${BC})
 endfunction()
+
+configure_file(sea.yaml sea.yaml @ONLY)
+configure_file(sea_cex_base.yaml sea.cex.yaml @ONLY)
+configure_file(sea_vac.yaml sea.vac.yaml @ONLY)
+configure_file(sea_pcond.yaml sea.pcond.yaml @ONLY)
 
 # Add "Jobs"
 add_subdirectory(rust-jobs/add)

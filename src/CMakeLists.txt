@@ -94,4 +94,3 @@ add_subdirectory(rust-jobs/vec)
 add_subdirectory(rust-jobs/enum-as-param)
 add_subdirectory(rust-jobs/option)
 add_subdirectory(rust-jobs/pointer)
-

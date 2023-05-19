@@ -83,7 +83,6 @@ def main(argv):
                 
                 if os.path.isfile(_input_file):
                     input_file = _input_file
-                    found = True
                 else:
                     _input_file = os.path.join(input_file, fname + "_llvm.bc")
                     if (os.path.isfile(_input_file)):

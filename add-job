@@ -55,9 +55,10 @@ def generate_cmake_lists(directory, job):
 
 
 def generate_rust(directory, job):
+    function_name = job.replace("-", "_")
     with open(f"{directory}/lib.rs", "w") as file:
         file.write("#[no_mangle]\n")
-        file.write(f"pub extern \"C\" fn {job}() -> T {{\n")
+        file.write(f"pub extern \"C\" fn {function_name}() -> T {{\n")
         file.write("    T\n")
         file.write("}\n")
 

@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "lib.h": "c"
+        "lib.h": "c",
+        "seahorn.h": "c",
+        "stdint.h": "c",
+        "stdbool.h": "c"
     }
 }

@@ -92,7 +92,7 @@ As a prerequisite, follow [this guide](https://github.com/seahorn/seahorn/tree/m
     cmake --build .
     ```
 
-## Adding a new job
+## Adding a New Job
 
 To simplify the process of creating a new verification job, the repository contains a script to generate all necessary files and to modify the correct CMake file. To create a new job with the script, run the following from the root project directory:
 

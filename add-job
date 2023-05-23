@@ -96,7 +96,7 @@ def generate_c(directory, job):
     file_contents = Template(dedent("""\
         #include <stdio.h>
 
-        #include "seahorn.h"
+        #include "seahorn/seahorn.h"
         #include "inc/lib.h"
 
         int main() {

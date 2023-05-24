@@ -1,0 +1,15 @@
+{
+    "jobs": [
+        "add",
+        "enum-as-param",
+        "option",
+        "option-and-then",
+        "option-is-some-and",
+        "option-or",
+        "option-unwrap-or",
+        "option-vec-map",
+        "pointer",
+        "string-parse",
+        "vec"
+    ]
+}

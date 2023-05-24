@@ -14,7 +14,11 @@ int main() {
     int res = add(v, 7);
     printf("Result: %d\r\n", res);
 
-    sassert(res >= 7);
+    if (v > 0) {
+        sassert(res > 7);
+    } else {
+        sassert(res <= 7);
+    }
 
     return 42;
 }

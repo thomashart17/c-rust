@@ -9,11 +9,14 @@ int sea_nd_int(void) {
 
 int main() {
     int v = sea_nd_int();
-    assume(v % 2 == 1);
 
     int result = option_unwrap_or(v);
 
-    sassert(result == 0);
+    if ((v & 1) == 0) {
+        sassert(result == v);
+    } else {
+        sassert(result == 0);
+    }
 
     return 42;
 }

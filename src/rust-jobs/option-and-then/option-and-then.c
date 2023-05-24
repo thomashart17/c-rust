@@ -14,13 +14,17 @@ int sea_nd_int(void) {
 
 int main() {
     int v = sea_nd_int();
-    assume(v % 2 == 0);
     assume(v > 0);
 
     int result = option_and_then(v);
 
     sea_printf("Result: result, v", result, v);
-    sassert(result > v);
+
+    if ((v & 1) == 0) {
+        sassert(result > v);
+    } else {
+        sassert(result == 0);
+    }
 
     return 42;
 }

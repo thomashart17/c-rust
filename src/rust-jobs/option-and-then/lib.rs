@@ -1,6 +1,6 @@
 #[no_mangle]
 pub extern "C" fn option_and_then(x: i32) -> i32 {
-    let result: Option<i32> = if x % 2 == 1 {
+    let result: Option<i32> = if (x & 1) == 1 {
         None
     } else {
         Some(x)

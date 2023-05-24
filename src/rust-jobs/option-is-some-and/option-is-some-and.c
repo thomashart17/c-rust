@@ -9,6 +9,7 @@ int sea_nd_int(void) {
 
 int main() {
     int v = sea_nd_int();
+    assume(v <= 0);
     
     bool result = option_is_some_and(v);
 

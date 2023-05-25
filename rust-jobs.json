@@ -9,6 +9,7 @@
         "option-unwrap-or",
         "option-vec-map",
         "pointer",
+        "string-parse",
         "vec"
     ]
 }

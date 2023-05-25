@@ -11,6 +11,7 @@
         "pointer",
         "string-parse",
         "vec",
-        "vec-filter"
+        "vec-filter",
+        "vec-sort-reverse"
     ]
 }

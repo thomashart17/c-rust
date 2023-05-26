@@ -130,10 +130,6 @@ cbindgen --config cbindgen.toml --output ./inc/lib.h
 
 This will generate a header file `lib.h` inside the crate's folder inside of a new `inc` folder.
 
-### Building Rust in C
-
-The Rust in CMake build toolchain was derived from the [CMakeRust repo](https://github.com/Devolutions/CMakeRust)
-
 ### LTO
 
 Link Time Optimization was based off the resource available [here](https://blog.llvm.org/2019/09/closing-gap-cross-language-lto-between.html).

@@ -12,27 +12,3 @@ path = "lib.rs"
 [dependencies]
 libc = "0.2"
 sea_rs_common = { path = "../../sea_rs_common" }
-
-[profile.dev]
-linker = "lld"
-
-panic = "abort"
-opt-level = 2
-
-rustflags = [
-    "-Clinker-plugin-lto",
-    "-Clinker=clang-14",
-    "-Clink-arg=-fuse-ld=lld",
-    "-Zemit-thin-lto=no",
-]
-
-[profile.release]
-panic = "abort"
-opt-level = 2
-
-rustflags = [
-    "-Clinker-plugin-lto",
-    "-Clinker=clang-14",
-    "-Clink-arg=-fuse-ld=lld",
-    "-Zemit-thin-lto=no",
-]

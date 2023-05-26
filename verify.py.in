@@ -95,28 +95,23 @@ def main(argv):
                    'yama', '--yforce']
 
             # base config
-            base_config = os.path.join(script_dir, 'seahorn', 'sea.yaml')
+            base_config = os.path.join(script_dir, 'src', 'sea.yaml')
             if args.cex:
-                base_config = os.path.join(script_dir, 'seahorn',
+                base_config = os.path.join(script_dir, 'src',
                                            'sea.cex.yaml')
             cmd.extend(['-y', base_config])
 
             # vacuity config
             if args.vac:
-                vac_config = os.path.join(script_dir, 'seahorn',
+                vac_config = os.path.join(script_dir, 'src',
                                           'sea.vac.yaml')
                 cmd.extend(['-y', vac_config])
 
             # pcond config
             if args.pcond:
-                pcond_config = os.path.join(script_dir, 'seahorn',
+                pcond_config = os.path.join(script_dir, 'src',
                                             'sea.pcond.yaml')
                 cmd.extend(['-y', pcond_config])
-
-            # job specific config
-            job_config = os.path.abspath(os.path.join(file_dir, '..', '..',
-                                                      'sea.yaml'))
-            cmd.extend(['-y', job_config])
 
             if args.dry_run:
                 cmd.append('--dry-run')

@@ -92,6 +92,18 @@ As a prerequisite, follow [this guide](https://github.com/seahorn/seahorn/tree/m
     cmake --build .
     ```
 
+## Adding a New Job
+
+To simplify the process of creating a new verification job, the repository contains a script to generate all necessary files and to modify the correct CMake file. To create a new job with the script, run the following from the root project directory:
+
+```bash
+./add-job <JOB_NAME>...
+```
+
+Where `JOB_NAME` is the name of the job to add. Note that multiple jobs can be added at once.
+
+Once the files have been generated, you will have to update the new Rust and C files with the code for your job.
+
 ## Build Process
 
 ### Generating C Headers From Rust Crate

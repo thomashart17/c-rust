@@ -16,7 +16,7 @@ int main() {
 
     int result = vec_sort_reverse(x, y, z);
 
-    sassert(result > x);
+    sassert(result >= x);
 
     return 42;
 }

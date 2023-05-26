@@ -1,0 +1,41 @@
+cargo-features = ["profile-rustflags"]
+
+[workspace]
+
+members = [
+    "src/rust-jobs/add",
+    "src/rust-jobs/enum-as-param",
+    "src/rust-jobs/option",
+    "src/rust-jobs/option-and-then",
+    "src/rust-jobs/option-is-some-and",
+    "src/rust-jobs/option-or",
+    "src/rust-jobs/option-unwrap-or",
+    "src/rust-jobs/option-vec-map",
+    "src/rust-jobs/pointer",
+    "src/rust-jobs/string-parse",
+    "src/rust-jobs/vec",
+    "src/rust-jobs/vec-filter",
+    "src/rust-jobs/vec-sort-reverse"
+]
+
+[profile.dev]
+panic = "abort"
+opt-level = 2
+
+rustflags = [
+   "-Clinker-plugin-lto", 
+   "-Clinker=clang-14",
+   "-Clink-arg=-fuse-ld=lld",
+   "-Zemit-thin-lto=no",
+]
+
+[profile.release]
+panic = "abort"
+opt-level = 2
+
+rustflags = [
+   "-Clinker-plugin-lto", 
+   "-Clinker=clang-14",
+   "-Clink-arg=-fuse-ld=lld",
+   "-Zemit-thin-lto=no"
+]

@@ -12,7 +12,7 @@ endfunction()
 function(c_rust_llvm TARGET SRC_FILES)
     generate_c_bindings(${TARGET})
 
-    corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml)
+    # corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml)
     corrosion_set_cargo_flags(${TARGET}-lib "-Zbuild-std=panic_abort,std" 
                                             "-Zbuild-std-features=panic_immediate_abort")
 

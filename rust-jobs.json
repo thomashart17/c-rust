@@ -10,6 +10,7 @@
         "option-vec-map",
         "pointer",
         "string-parse",
+        "test",
         "vec",
         "vec-filter",
         "vec-sort-reverse"

@@ -2,7 +2,7 @@
 
 #include "seahorn/seahorn.h"
 
-#include "inc/lib.h"\
+#include "inc/lib.h"
 
 int sea_nd_int(void) {
     return 42;

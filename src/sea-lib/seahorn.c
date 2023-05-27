@@ -6,6 +6,7 @@
  * optimizataion and verification takes place 
  */
 #include "seahorn/seahorn.h"
+#include <stdint.h> 
 
 void __VERIFIER_error (void) {
     return;
@@ -17,4 +18,8 @@ void __VERIFIER_assume (int i) {
 
 void __SEA_assume(bool b) {
     return;
+}
+
+int32_t sea_nd_i32(void) {
+  return 0;
 }

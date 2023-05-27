@@ -45,8 +45,5 @@ set(VERIFY_CMD python3 ${CMAKE_CURRENT_BINARY_DIR}/verify)
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${SEAHORN_ROOT}/include)
 
-
-corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml)
-
 add_subdirectory(src)
 

@@ -5,10 +5,12 @@ endfunction()
 # Generate target to compile C files, link with Rust library, and produce LLVM IR
 # The Rust library is expected to be called ${TARGET}-lib
 function(c_rust_llvm TARGET SRC_FILES)
-    # XXX all Rust libraries are loaded together from the workspace
-    # corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml)
-
     set(RUST_LIB_TARGET ${TARGET}-lib)
+
+    # XXX all Rust libraries are loaded together from the workspace
+    corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml 
+                           CRATES ${RUST_LIB_TARGET})
+
 
     # build std library; require panic to abort without printing anything
     corrosion_set_cargo_flags(${RUST_LIB_TARGET}	
@@ -16,7 +18,7 @@ function(c_rust_llvm TARGET SRC_FILES)
 				 "-Zbuild-std-features=panic_immediate_abort")
     # generate Rust to C bindings
     add_custom_command(
-		    OUTPUT inc/lib.h
+		    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/inc/lib.h
 		    COMMAND cbindgen ARGS --config ${CBINDGEN_TOML} --output ${CMAKE_CURRENT_BINARY_DIR}/inc/lib.h
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		    DEPENDS ${RUST_LIB_TARGET}
@@ -60,9 +62,10 @@ function(c_rust_llvm TARGET SRC_FILES)
     )
 
     SET(BC_FILE ${TARGET}_llvm.bc)
+    SET(LL_FILE ${TARGET}_llvm.ll)
 
     add_custom_command(
-        OUTPUT ${TARGET}-bc
+        OUTPUT  ${BC_FILE}
         COMMAND ${LLVM_OBJCOPY} ARGS ${CMAKE_CURRENT_BINARY_DIR}/${TARGET} --dump-section .llvmbc=${BC_FILE}
         DEPENDS ${TARGET}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -70,18 +73,19 @@ function(c_rust_llvm TARGET SRC_FILES)
     )
 
     add_custom_command(
-        OUTPUT ${TARGET}-llvm
+        OUTPUT  ${LL_FILE}
         COMMAND ${LLVM_DIS} ARGS ${CMAKE_CURRENT_BINARY_DIR}/${BC_FILE}
-        DEPENDS ${TARGET}-bc
+        DEPENDS ${BC_FILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Outputting disassembled program post merge pre opt llvm code for ${TARGET}"
     )
 
-    add_custom_target(${TARGET}.ir ALL DEPENDS ${TARGET}-llvm)
+    add_custom_target(${TARGET}.ir ALL DEPENDS ${LL_FILE})
     
     set_target_properties(${TARGET}.ir PROPERTIES
         LLVMIR_DIR ${CMAKE_CURRENT_BINARY_DIR}
         LLVMIR_FILES ${BC_FILE}
+        LLVMIR_LL_FILES ${LL_FILE}
     )
 endfunction()
 

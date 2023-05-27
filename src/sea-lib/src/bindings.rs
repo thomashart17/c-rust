@@ -50,3 +50,7 @@ extern "C" {
         arg2: *mut ::core::ffi::c_char,
     ) -> ::core::ffi::c_char;
 }
+
+extern "C" {
+  pub fn sea_nd_i32() -> i32;
+}

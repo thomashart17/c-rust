@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.19)
 project(C-Rust)
 
 # ---------- Local CMake Modules ----------- #
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 
 # ---------- Install Corrosion ----------- #
@@ -24,6 +24,8 @@ FetchContent_MakeAvailable(Corrosion)
 include(CTest)
 enable_testing()
 
+include(SeaHornBuild)
+
 set(SEAHORN_ROOT "" CACHE PATH "Path to SeaHorn installation")
 set(SEA_LINK "llvm-link-14" CACHE STRING "Path to llvm-link")
 set(SEA_OPT "${SEAHORN_ROOT}/bin/seaopt" CACHE STRING "Path to seaopt binary")
@@ -42,6 +44,7 @@ set(VERIFY_CMD python3 ${CMAKE_CURRENT_BINARY_DIR}/verify)
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${SEAHORN_ROOT}/include)
+
 
 corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml)
 

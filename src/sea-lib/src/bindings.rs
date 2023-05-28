@@ -54,3 +54,7 @@ extern "C" {
 extern "C" {
   pub fn sea_nd_i32() -> i32;
 }
+
+extern "C" {
+  pub fn sea_nd_bool() -> bool;
+}

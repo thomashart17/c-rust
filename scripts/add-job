@@ -11,7 +11,7 @@ import sys
 from string import Template
 from textwrap import dedent
 
-BASE = os.path.dirname(os.path.realpath(__file__))
+BASE = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 def generate_cargo(directory, job):
     file_contents = Template(dedent("""\
@@ -29,43 +29,9 @@ def generate_cargo(directory, job):
         [dependencies]
         libc = "0.2"
         sea_rs_common = { path = "../../sea_rs_common" }
-
-        [profile.dev]
-        linker = "lld"
-
-        panic = "abort"
-        opt-level = 2
-
-        rustflags = [
-            "-Clinker-plugin-lto",
-            "-Clinker=clang-14",
-            "-Clink-arg=-fuse-ld=lld",
-            "-Zemit-thin-lto=no",
-        ]
-
-        [profile.release]
-        panic = "abort"
-        opt-level = 2
-
-        rustflags = [
-            "-Clinker-plugin-lto",
-            "-Clinker=clang-14",
-            "-Clink-arg=-fuse-ld=lld",
-            "-Zemit-thin-lto=no",
-        ]
     """)).substitute(job=job)
 
     with open(f"{directory}/Cargo.toml", "w") as file:
-        file.write(file_contents)
-
-
-def generate_toolchain(directory):
-    file_contents = Template(dedent("""\
-        [toolchain]
-        channel = "nightly-2022-08-01"
-    """)).substitute()
-
-    with open(f"{directory}/rust-toolchain.toml", "w") as file:
         file.write(file_contents)
 
 
@@ -112,7 +78,7 @@ def generate_c(directory, job):
 
 
 def add_to_json(job):
-    json_file = os.path.join(BASE, "rust-jobs.json")
+    json_file = os.path.join(BASE, "scripts", "rust-jobs.json")
 
     with open(json_file, "r") as file:
         data = json.load(file)
@@ -124,7 +90,7 @@ def add_to_json(job):
 
 
 def update_cmake():
-    json_file = os.path.join(BASE, "rust-jobs.json")
+    json_file = os.path.join(BASE, "scripts", "rust-jobs.json")
 
     with open(json_file, "r") as file:
         data = json.load(file)
@@ -155,7 +121,6 @@ def main():
 
             os.mkdir(directory)
             generate_cargo(directory, job)
-            generate_toolchain(directory)
             generate_cmake_lists(directory, job)
             generate_rust(directory, job)
             generate_c(directory, job)

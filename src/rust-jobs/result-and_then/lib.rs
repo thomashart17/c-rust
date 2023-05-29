@@ -5,7 +5,7 @@ pub extern "C" fn divide_and_multiply(x: i32, y: i32) -> i32 {
 
     match result {
         Ok(value) => value,
-        Err(error) => -1,
+        Err(_) => -1,
     }
 }
 

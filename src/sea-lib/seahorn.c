@@ -7,6 +7,7 @@
  */
 #include "seahorn/seahorn.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 void __VERIFIER_error(void) { return; }
@@ -18,3 +19,11 @@ void __SEA_assume(bool b) { return; }
 int32_t sea_nd_i32(void) { return 0; }
 
 bool sea_nd_bool(void) { return true; }
+
+void *sea_realloc(void *ptr, size_t sz) {
+  if (ptr)
+    free(ptr);
+  return malloc(sz);
+}
+
+void *realloc(void *ptr, size_t sz) { return sea_realloc(ptr, sz); }

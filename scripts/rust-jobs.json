@@ -1,6 +1,9 @@
 {
     "jobs": [
         "add",
+        "custom-print",
+        "custom-print-no-std",
+        "empty-print",
         "enum-as-param",
         "option",
         "option-and-then",

@@ -1,4 +1,7 @@
 add_subdirectory(add)
+add_subdirectory(custom-print)
+add_subdirectory(custom-print-no-std)
+add_subdirectory(empty-print)
 add_subdirectory(enum-as-param)
 add_subdirectory(option)
 add_subdirectory(option-and-then)

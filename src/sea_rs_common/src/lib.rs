@@ -1,10 +1,19 @@
 // C function signature:
 // #[no_mangle]
 // pub extern "C" fn _____(...) -> ... {}
-
 #![feature(lang_items)]
+#![no_std]
 
-use std::alloc::{GlobalAlloc, Layout};
+
+#![feature(alloc_error_handler)]
+#![feature(core_intrinsics)]
+extern crate alloc;
+use core::panic::PanicInfo;
+use core::intrinsics;
+
+
+
+use core::alloc::{GlobalAlloc, Layout};
 
 use libc::c_void;
 
@@ -26,11 +35,13 @@ unsafe impl GlobalAlloc for CAllocator {
     }
 }
 
-// #[lang = "panic_fmt"]
-// #[no_mangle]
-// pub extern "C" fn panic_fmt() -> ! {
-//     loop {}
-// }
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    intrinsics::abort();
+}
 
-
+#[alloc_error_handler]
+fn alloc_error_handler(_layout: core::alloc::Layout) -> ! {
+    intrinsics::abort();
+}
 

@@ -4,6 +4,7 @@ use sea;
 sea::define_sea_nd!(sea_nd_arg, i32, 42);
 
 // Entry point for the proof
+
 #[no_mangle]
 pub extern "C" fn entrypt() {
     let v = sea_nd_arg();

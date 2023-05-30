@@ -28,6 +28,7 @@ def generate_cargo(directory, job):
 
         [dependencies]
         libc = "0.2"
+        sea = { path = "../../sea-lib" }
         sea_rs_common = { path = "../../sea_rs_common" }
     """)).substitute(job=job)
 

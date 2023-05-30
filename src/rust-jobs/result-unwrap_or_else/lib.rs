@@ -1,8 +1,17 @@
+#![no_std]
+pub use sea_rs_common::CAllocator;
+
+extern crate alloc;
+use alloc::string::String;
+
+extern crate core;
+use core::result::Result;
+
 #[no_mangle]
 pub extern "C" fn unwrap_or_else(x: i32, y: i32) -> i32 {
-    let result = divide_result(x, y);
+    let result: Result<i32, String> = divide_result(x, y);
 
-    let value = result.unwrap_or_else(|_| {
+    let value: i32 = result.unwrap_or_else(|_| {
         -1
     });
     value

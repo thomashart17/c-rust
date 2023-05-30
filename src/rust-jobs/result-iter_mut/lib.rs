@@ -1,3 +1,9 @@
+#![no_std]
+pub use sea_rs_common::CAllocator;
+
+extern crate core;
+use core::result::Result;
+
 #[no_mangle]
 pub extern "C" fn iter_mut(input: i32) -> i32 {
     if input >= 0 {

@@ -1,3 +1,6 @@
+#![no_std]
+pub use sea_rs_common::CAllocator;
+
 #[repr(C)]
 pub enum CEnum {
     KValOne,

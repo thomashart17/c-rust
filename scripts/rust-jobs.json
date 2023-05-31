@@ -3,6 +3,7 @@
         "add",
         "custom-print",
         "custom-print-no-std",
+        "custom-print-writer",
         "empty-print",
         "enum-as-param",
         "option",

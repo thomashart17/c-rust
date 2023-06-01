@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h> // for free
 
 void __VERIFIER_error(void) { return; }
 

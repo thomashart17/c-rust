@@ -11,8 +11,13 @@ path = "lib.rs"
 
 [dependencies]
 libc = "0.2"
-sea = { path = "../../sea-lib" }
 sea_rs_common = { path = "../../sea_rs_common" }
+sea = { path = "../../sea-lib", features = ["std"] }
+
+[features]
+default = []  # Specify other default features here, if any
+std = ["sea/std"]
+
 
 [dependencies.custom-print]
 version = "0.1.0"

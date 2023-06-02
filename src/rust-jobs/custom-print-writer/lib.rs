@@ -1,5 +1,4 @@
 use sea;
-
 sea::define_sea_nd!(sea_nd_arg, i32, 42);
 
 use core::fmt::{self, Arguments};

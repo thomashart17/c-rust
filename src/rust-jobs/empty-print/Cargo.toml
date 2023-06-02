@@ -12,4 +12,8 @@ path = "lib.rs"
 [dependencies]
 libc = "0.2"
 sea_rs_common = { path = "../../sea_rs_common" }
-sea = { path = "../../sea-lib" }
+sea = { path = "../../sea-lib", features = ["std"] }
+
+[features]
+default = []  # Specify other default features here, if any
+std = ["sea/std"]

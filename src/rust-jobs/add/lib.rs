@@ -1,5 +1,9 @@
-use sea;
+// #[cfg(feature = "feature_no_std")]
+#![no_std]
+pub use sea;
+// pub use sea_rs_common::CAllocator;
 
+    // Code for no_std module
 // Define a sea_nd function
 sea::define_sea_nd!(sea_nd_arg, i32, 42);
 

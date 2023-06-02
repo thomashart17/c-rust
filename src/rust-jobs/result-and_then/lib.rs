@@ -1,11 +1,8 @@
 #![no_std]
-pub use sea_rs_common::CAllocator;
+pub use sea;
 
 extern crate alloc;
 use alloc::string::String;
-
-extern crate core;
-use core::result::Result;
 
 
 #[no_mangle]

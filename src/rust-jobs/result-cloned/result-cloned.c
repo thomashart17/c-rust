@@ -11,7 +11,6 @@ int main() {
     int x = sea_nd_int();
     int res = clone(x);
 
-    assume(x);
     sassert(res == x*2);
 
     return 0;

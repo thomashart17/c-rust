@@ -1,5 +1,5 @@
 #![no_std]
-pub use sea_rs_common::CAllocator;
+pub use sea;
 
 extern crate alloc;
 use alloc::string::String;

@@ -1,11 +1,7 @@
 #![no_std]
-pub use sea_rs_common::CAllocator;
-
+pub use sea_rs_common;
 extern crate alloc;
 use alloc::vec::Vec;
-
-extern crate core;
-use core::option::Option;
 
 #[no_mangle]
 pub extern "C" fn option_vec_map(n: u8) -> u32 {

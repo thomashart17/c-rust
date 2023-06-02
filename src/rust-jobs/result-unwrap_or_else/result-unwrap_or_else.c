@@ -12,7 +12,6 @@ int main() {
     int y = sea_nd_int();
     int res = unwrap_or_else(x, y);
 
-    assume(x);
     assume(y <= 0);
     sassert(res == -1);
 

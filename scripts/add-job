@@ -28,8 +28,13 @@ def generate_cargo(directory, job):
 
         [dependencies]
         libc = "0.2"
-        sea = { path = "../../sea-lib" }
         sea_rs_common = { path = "../../sea_rs_common" }
+        sea = { path = "../../sea-lib", features = ["std"] }
+
+        [features]
+        default = []  # Specify other default features here, if any
+        feature_no_std = ["sea/std"]
+        
     """)).substitute(job=job)
 
     with open(f"{directory}/Cargo.toml", "w") as file:

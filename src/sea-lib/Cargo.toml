@@ -1,9 +1,18 @@
 [package]
 name = "sea"
 version = "0.1.0"
+edition = "2021"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 crate-type = ["staticlib", "lib"]
 
+[dependencies]
+sea = { version = "0.1.0", optional = true }
+sea_rs_common = { path = "../sea_rs_common" }
+
+[features]
+default = []  # Specify other default features here, if any
+std = []

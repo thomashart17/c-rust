@@ -1,8 +1,8 @@
-#![no_std]
-pub use sea_rs_common::CAllocator;
+// #![no_std]
+// pub use sea_rs_common::CAllocator;
 
-extern crate core;
-use core::result::Result;
+// extern crate core;
+// use core::result::Result;
 
 
 #[no_mangle]

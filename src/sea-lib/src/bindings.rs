@@ -5,7 +5,7 @@ extern "C" {
 }
 extern "C" {
     #[doc = "A condition to be assumed to be true by the verifier"]
-    pub fn __VERIFIER_assume(arg1: ::core::ffi::c_int);
+    pub fn __VERIFIER_assume(arg1: i32);
 }
 extern "C" {
     pub fn __SEA_assume(arg1: bool);
@@ -20,13 +20,13 @@ extern "C" {
     pub fn __VERIFIER_assert_if(arg1: bool, arg2: bool);
 }
 extern "C" {
-    pub fn sea_is_dereferenceable(ptr: *const ::core::ffi::c_void, offset: isize) -> bool;
+    pub fn sea_is_dereferenceable(ptr: *const i8, offset: isize) -> bool;
 }
 extern "C" {
     pub fn sea_assert_if(arg1: bool, arg2: bool);
 }
 extern "C" {
-    pub fn sea_is_modified(arg1: *mut ::core::ffi::c_char) -> bool;
+    pub fn sea_is_modified(arg1: *mut i8) -> bool;
 }
 extern "C" {
     pub fn sea_tracking_on();

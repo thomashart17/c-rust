@@ -1,23 +1,23 @@
-use bindings;
+use crate::bindings::*;
 
 #[no_mangle]
 pub fn verifier_error() {
-  unsafe { bindings::__VERIFIER_error(); }
+  unsafe { __VERIFIER_error(); }
 }
 
 #[no_mangle]
 pub fn assume(v: bool) {
-  unsafe { bindings::__VERIFIER_assume(v.into()); }
+  unsafe { __VERIFIER_assume(v.into()); }
 }
 
 #[no_mangle]
 pub fn nd_i32() -> i32 {
-  unsafe { bindings::sea_nd_i32() }
+  unsafe { sea_nd_i32() }
 }
 
 #[no_mangle]
 pub fn nd_bool() -> bool {
-  unsafe { bindings::sea_nd_bool() }
+  unsafe { sea_nd_bool() }
 }
 
 #[macro_export]

@@ -12,3 +12,7 @@ edition = "2021"
 
 [dependencies]
 libc = "0.2"
+
+[dependencies.custom-print]
+version = "0.1.0"
+default-features = false

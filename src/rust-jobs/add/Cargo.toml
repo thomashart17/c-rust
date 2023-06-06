@@ -19,3 +19,7 @@ sea = { path = "../../sea-lib", features = [] }
 [features]
 default = []  # Specify other default features here, if any
 std = []
+
+[dependencies.custom-print]
+version = "0.1.0"
+default-features = false

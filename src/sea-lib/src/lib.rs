@@ -1,8 +1,10 @@
-// #![cfg_attr(feature = "no_std", no_std)]
+#![no_std]
+
+pub extern crate sea_rs_common;
 
 // #[cfg(not(feature = "no_std"))]
 // #![no_std]
-#![cfg_attr(not(feature = "std"), no_std)]
+// #![cfg_attr(not(feature = "std"), no_std)]
 // #[cfg(not(feature = "std"))]
 // extern crate sea_rs_common;
 #[cfg(not(feature = "std"))]

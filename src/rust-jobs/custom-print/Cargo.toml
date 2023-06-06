@@ -11,6 +11,5 @@ path = "lib.rs"
 
 [dependencies]
 libc = "0.2"
-sea_rs_common = { path = "../../sea_rs_common" }
 custom-print = "0.1.0"
 sea = { path = "../../sea-lib" }

@@ -3,8 +3,6 @@
 pub use sea;
 // pub use sea_rs_common::CAllocator;
 
-use sea;
-
 use sea_rs_common::define_custom_print;
 use sea_rs_common::NullWriter;
 

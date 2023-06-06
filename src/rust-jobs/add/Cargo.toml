@@ -12,10 +12,24 @@ crate-type = ["staticlib"]
 path = "lib.rs"
 
 [dependencies]
-libc = "0.2"
-sea_rs_common = { path = "../../sea_rs_common" }
-sea = { path = "../../sea-lib", features = [] }
+
+[dependencies.sea]
+path = "../../sea-lib"
+default-features = false
+features = ["panic_error"]
 
 [features]
-default = []  # Specify other default features here, if any
-std = []
+# default = []  # Specify other default features here, if any
+# std = ["sea/std"]
+
+# [dependencies]
+# libc = "0.2"
+# sea_rs_common = { path = "../../sea_rs_common" }
+# sea = { path = "../../sea-lib", default-features = false, optional = true  }
+
+# [features]
+# default = []  # Specify other default features here, if any
+# std = ["sea", "sea/std"]
+
+# sea = { path = "../../sea-lib", features = [] }
+# sea = { path = "../../sea-lib"  }

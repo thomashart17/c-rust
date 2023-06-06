@@ -1,11 +1,3 @@
-// #![no_std]
-// pub use sea_rs_common::CAllocator;
-
-// extern crate alloc;
-// use alloc::string::String;
-
-// extern crate core;
-// use core::result::Result;
 
 #[no_mangle]
 pub extern "C" fn as_deref(input: i32) -> i32 {

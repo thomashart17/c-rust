@@ -1,15 +1,20 @@
-// #![cfg_attr(feature = "no_std", no_std)]
 
-// #[cfg(not(feature = "no_std"))]
-// #![no_std]
 #![cfg_attr(not(feature = "std"), no_std)]
-// #[cfg(not(feature = "std"))]
-// extern crate sea_rs_common;
-#[cfg(not(feature = "std"))]
-pub use sea_rs_common::CAllocator;
 
-// extern crate bindings; 
-// use bindings;
+#![feature(core_intrinsics)]
+#![feature(alloc_error_handler)]
+
+
+#[cfg(all(feature = "std", feature = "panic_error"))]
+compile_error!("Features \"std\" and \"panic_error\" are mutually exclusive and cannot be enabled at the same time.
+\"panic_error\" is to be used when using #![no_std]");
+
+#[cfg(not(feature = "std"))]
+pub mod allocator;
+#[cfg(not(feature = "std"))]
+pub mod error_handle;
+
+
 pub mod bindings;
 pub mod seahorn;
 pub use seahorn::*;

@@ -4,5 +4,10 @@
         "seahorn.h": "c",
         "stdint.h": "c",
         "stdbool.h": "c"
-    }
+    },
+    "rust-analyzer.linkedProjects": [
+        "./src/sea-lib/Cargo.toml",
+        "./src/sea-lib/Cargo.toml",
+        "./src/sea-lib/Cargo.toml"
+    ]
 }

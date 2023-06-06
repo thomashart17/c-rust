@@ -1,5 +1,5 @@
 #![no_std]
-pub use sea_rs_common::CAllocator;
+pub use sea;
 
 #[repr(C)]
 pub enum CEnum {

@@ -1,10 +1,7 @@
 #![no_std]
 pub use sea;
 
-use sea_rs_common::define_custom_print;
-use sea_rs_common::NullWriter;
-
-define_custom_print!();
+sea::define_custom_print!();
 
 // Define a sea_nd function
 sea::define_sea_nd!(sea_nd_arg, i32, 42);

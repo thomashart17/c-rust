@@ -15,5 +15,6 @@ pub mod error_handle;
 
 
 pub mod bindings;
+pub mod print_macros;
 pub mod seahorn;
 pub use seahorn::*;

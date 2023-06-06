@@ -17,3 +17,4 @@ sea_rs_common = { path = "../sea_rs_common" }
 [features]
 default = []  # Specify other default features here, if any
 std = []
+panic_error = []

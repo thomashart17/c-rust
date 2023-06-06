@@ -12,6 +12,7 @@ crate-type = ["staticlib"]
 path = "lib.rs"
 
 [dependencies]
+sea_rs_common = {path = "../../sea_rs_common" }
 
 [dependencies.sea]
 path = "../../sea-lib"

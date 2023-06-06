@@ -1,8 +1,7 @@
-![os](https://img.shields.io/badge/os-linux-orange?logo=linux)
-
-[![CI](https://github.com/thomashart17/c-rust/actions/workflows/main.yml/badge.svg)](https://github.com/thomashart17/c-rust/actions?query=workflow%3ACI)
-
 # c-rust
+
+![os](https://img.shields.io/badge/os-linux-orange?logo=linux)
+[![CI](https://github.com/thomashart17/c-rust/actions/workflows/main.yml/badge.svg)](https://github.com/thomashart17/c-rust/actions?query=workflow%3ACI)
 
 Building this project will first require installations of Rust, cbindgen and LLVM 14
 

@@ -1,6 +1,4 @@
 #![no_std]
-pub use sea_rs_common::CAllocator;
-
 use sea;
 
 sea::define_sea_nd!(sea_nd_int, i32, 42);

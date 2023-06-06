@@ -1,17 +1,4 @@
-// C function signature:
-// #[no_mangle]
-// pub extern "C" fn _____(...) -> ... {}
-// #![feature(lang_items)]
-
-// **************************
-// Global Allocator is automatically read by std
-//
-// When using no_std, this lib must be used to
-// have an Allocator, panic handler, and error handler 
-// **************************
-
 #![no_std]
-
 
 use core::fmt::{self, Arguments};
 

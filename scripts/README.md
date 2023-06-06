@@ -10,6 +10,6 @@ To simplify the process of creating a new verification job, the repository conta
 
 Where `JOB_NAME` is the name of the job to add. Note that multiple jobs can be added at once.
 
-Once the files have been generated, you will have to update the new Rust and C files with the code for your job.
+Once the files have been generated, you will have to update the new Rust file with the code for your job.
 
 To remove a job, simply delete the files that were generated and remove the corresponding lines from `src/rust-jobs/CMakeLists.txt` and `rust-jobs.json`.

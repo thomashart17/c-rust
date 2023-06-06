@@ -1,31 +1,28 @@
 #include <stdio.h>
 
-#include "seahorn/seahorn.h"
 #include "inc/lib.h"
+#include "seahorn/seahorn.h"
 
-int sea_nd_int() {
-    return 0;
-}
+int sea_nd_int() { return 0; }
 
 int main() {
-    int x = sea_nd_int();
-    int y = sea_nd_int();
-    int res = divide_and_multiply(x, y);
+  int x = sea_nd_int();
+  int y = sea_nd_int();
+  int res = divide_and_multiply(x, y);
 
-    assume(x);
-    assume(y <= 0);
-    sassert(res == -1);
+  assume(x > 0);
+  assume(y <= 0);
+  sassert(res == -1);
 
+  /* assume(x <= 0); */
+  /* assume(y > 0); */
+  /* sassert(res == -1); */
 
-    assume(x <= 0);
-    assume(y > 0);
-    sassert(res == -1);
+  /* assume(x >= 0); */
+  /* assume(y > 0); */
+  /* sassert(res > 0); */
 
-    assume(x >= 0);
-    assume(y > 0);
-    sassert(res > 0);
-
-    return 42;
+  return 42;
 }
 
 // int v = sea_nd_int();

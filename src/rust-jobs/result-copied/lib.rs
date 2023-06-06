@@ -1,8 +1,21 @@
+#![no_std]
+pub use sea_rs_common::CAllocator;
+
+extern crate core;
+use core::result::Result;
+
+use sea;
+
+sea::define_sea_nd!(sea_nd_int, i32, 42);
 
 #[no_mangle]
-pub extern "C" fn copied(x: i32) -> i32 {
-    let val: i32 = x;
-    let x: Result<&i32, i32> = Ok(&val);
+pub extern "C" fn entrypt() {
+    let v: i32 = sea_nd_int();
+    sea::assume(v > 0);
+
+    let x: Result<&i32, i32> = Ok(&v);
     let copied: Result<i32, i32> = x.copied();
-    copied.unwrap()*2
+    let result: i32 = copied.unwrap()*2;
+
+    sea::sassert!(result > v);
 }

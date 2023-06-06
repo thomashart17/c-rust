@@ -1,11 +1,28 @@
+#![no_std]
+pub use sea_rs_common::CAllocator;
+
+extern crate core;
+use core::option::Option;
+
+use sea;
+
+sea::define_sea_nd!(sea_nd_int, i32, 42);
 
 #[no_mangle]
-pub extern "C" fn option_unwrap_or(x: i32) -> i32 {
-    let result: Option<i32> = if (x & 1) == 1 { 
+pub extern "C" fn entrypt() {
+    let v: i32 = sea_nd_int();
+
+    let result: Option<i32> = if (v & 1) == 1 { 
         None 
     } else { 
-        Some(x)
+        Some(v)
     };
 
-    result.unwrap_or(0)
+    let result = result.unwrap_or(0);
+
+    if (v & 1) == 0 {
+        sea::sassert!(result == v);
+    } else {
+        sea::sassert!(result == 0);
+    }
 }

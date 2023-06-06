@@ -42,3 +42,5 @@ verify_options:
   temp-dir: /tmp/c-rust
 # time and result stats
   horn-stats: true
+# Promote defined verifier fns
+  ignore-def-verifier-fns: false

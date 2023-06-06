@@ -17,6 +17,8 @@ void __VERIFIER_assume(int i) { return; }
 
 void __SEA_assume(bool b) { return; }
 
+void __VERIFIER_assert(bool pred) {}
+
 int32_t sea_nd_i32(void) { return 0; }
 
 bool sea_nd_bool(void) { return true; }

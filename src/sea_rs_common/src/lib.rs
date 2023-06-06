@@ -31,6 +31,7 @@ fn alloc_error_handler(_layout: core::alloc::Layout) -> ! {
 
 
 use core::alloc::{GlobalAlloc, Layout};
+use core::fmt::{self, Arguments};
 use libc::c_void;
 pub struct CAllocator {}
 
@@ -48,3 +49,23 @@ unsafe impl GlobalAlloc for CAllocator {
     }
 }
 
+pub struct NullWriter;
+
+impl NullWriter {
+    pub fn write_fmt(&mut self, _: Arguments<'_>) -> fmt::Result { Ok(()) }
+}
+
+#[macro_export]
+macro_rules! define_custom_print {
+    () => {
+        custom_print::define_macros!(
+            {cprint, cprintln, ceprint, ceprintln},
+            NullWriter
+        );
+
+        use cprint as print;
+        use cprintln as println;
+        use ceprint as eprint;
+        use ceprintln as eprintln;
+    };
+}

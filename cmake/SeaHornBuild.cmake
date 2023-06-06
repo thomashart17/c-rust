@@ -33,10 +33,14 @@ function(c_rust_llvm TARGET SRC_FILES)
     target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}) 
 
     set(ARCH x86_64-unknown-linux-gnu)
+    # add vacuity check def for jobs that directly
+    # include seahorn header
+    target_compile_definitions(${TARGET} PRIVATE VACCHECK)
+
     # compile C files with LTO 
     # do not perform optimizations, but do not add optnone marker in LLVM IR
     # target is set to linux, this might not be required
-    target_compile_options(${TARGET} PUBLIC 
+    target_compile_options(${TARGET} PUBLIC
         -flto
         -O1
         -Xclang -disable-llvm-optzns

@@ -127,7 +127,7 @@ def main():
             os.mkdir(directory)
             generate_cargo(directory, job)
             generate_cmake_lists(directory, job)
-            generate_rust(directory, job)
+            generate_rust(directory)
             generate_c(directory, job)
             add_to_json(job)
             print(f"Created job: {job}")

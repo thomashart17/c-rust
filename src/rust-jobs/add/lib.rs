@@ -1,23 +1,44 @@
+// #[cfg(feature = "feature_no_std")]
 #![no_std]
 pub use sea;
 
-use sea_rs_common::define_custom_print;
-use sea_rs_common::NullWriter;
+sea::define_custom_print!();
 
-define_custom_print!();// Define a sea_nd function
+// Define a sea_nd function
 sea::define_sea_nd!(sea_nd_arg, i32, 42);
 
 // Entry point for the proof
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    println!("Hello, world!");
+    test_test1();
+    test_test2();
+}
+
+#[no_mangle]
+fn test_test1() {
+    println!("Hello, test1!");
     let v = sea_nd_arg();
     sea::assume(v >= 1);
     let res = add(v, 7);
+
     if v > 0 {
         sea::sassert!(res > 7);
     } else {
         sea::sassert!(res <= 7);
+    }
+}
+
+#[no_mangle]
+fn test_test2() {
+    println!("Hello, test2!");
+    let v = sea_nd_arg();
+    sea::assume(v >= 1);
+    let res = add(v, 8);
+
+    if v > 0 {
+        sea::sassert!(res > 8);
+    } else {
+        sea::sassert!(res <= 8);
     }
 }
 

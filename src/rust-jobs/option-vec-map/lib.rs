@@ -3,9 +3,13 @@ pub use sea;
 extern crate alloc;
 use alloc::vec::Vec;
 
+sea::define_sea_nd!(sea_nd_u8, u8, 42);
+
 #[no_mangle]
-pub extern "C" fn option_vec_map(n: u8) -> u32 {
-    let capacity: usize = n as usize;
+pub extern "C" fn entrypt() {
+    let v: u8 = sea_nd_u8();
+
+    let capacity: usize = v as usize;
     let mut nums: Vec<Option<u32>> = Vec::with_capacity(capacity);
 
     for i in 1..=capacity {
@@ -22,9 +26,9 @@ pub extern "C" fn option_vec_map(n: u8) -> u32 {
         }
     }
 
-    sum
+    sea::sassert!(sum >= (v as u32)*(v as u32));
 }
 
 fn square(val: Option<u32>) -> Option<u32> {
-    val.map(|x| x * x)
+    val.map(|x: u32| x * x)
 }

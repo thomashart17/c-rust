@@ -53,15 +53,13 @@ def generate_cmake_lists(directory, job):
         file.write(file_contents)
 
 
-def generate_rust(directory, job):
-    function_name = job.replace("-", "_")
-
+def generate_rust(directory):
     file_contents = Template(dedent("""\
         #[no_mangle]
-        pub extern \"C\" fn $function_name() -> T {
-            T
+        pub extern \"C\" fn entrypt() {
+            
         }
-    """)).substitute(function_name=function_name)
+    """)).substitute()
 
     with open(f"{directory}/lib.rs", "w") as file:
         file.write(file_contents)
@@ -75,7 +73,7 @@ def generate_c(directory, job):
         #include "inc/lib.h"
 
         int main() {
-        
+            entrypt();
             return 42;
         }
     """)).substitute()
@@ -129,7 +127,7 @@ def main():
             os.mkdir(directory)
             generate_cargo(directory, job)
             generate_cmake_lists(directory, job)
-            generate_rust(directory, job)
+            generate_rust(directory)
             generate_c(directory, job)
             add_to_json(job)
             print(f"Created job: {job}")

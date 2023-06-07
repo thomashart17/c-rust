@@ -1,13 +1,26 @@
+#![no_std]
+use sea;
+
+sea::define_sea_nd!(sea_nd_int, i32, 42);
 
 #[no_mangle]
-pub extern "C" fn option_or(x: i32, y: i32) -> i32 {
-    let val1: Option<i32> = if (x & 1) == 1 { 
+pub extern "C" fn entrypt() {
+    let v: i32 = sea_nd_int();
+    let w: i32 = sea_nd_int();
+
+    let val1: Option<i32> = if (v & 1) == 1 { 
         None 
     } else { 
-        Some(x)
+        Some(v)
     };
 
-    let val2: Option<i32> = Some(y);
+    let val2: Option<i32> = Some(w);
 
-    val1.or(val2).unwrap()
+    let result: i32 = val1.or(val2).unwrap();
+
+    if (v & 1) == 0 {
+        sea::sassert!(result == v);
+    } else {
+        sea::sassert!(result == w);
+    }
 }

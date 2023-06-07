@@ -1,5 +1,3 @@
-#![no_std]
-
 use core::fmt::{self, Arguments};
 
 pub struct NullWriter;
@@ -13,7 +11,7 @@ macro_rules! define_custom_print {
     () => {
         custom_print::define_macros!(
             {cprint, cprintln, ceprint, ceprintln},
-            NullWriter
+            sea::print_macros::NullWriter
         );
 
         use cprint as print;

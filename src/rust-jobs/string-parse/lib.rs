@@ -5,8 +5,10 @@ extern crate alloc;
 use alloc::string::String;
 
 #[no_mangle]
-pub extern "C" fn string_parse() -> i32 {
+pub extern "C" fn entrypt() {
     let value: String = String::from("42");
 
-    value.parse().unwrap()
+    let result: i32 = value.parse().unwrap();
+
+    sea::sassert!(result == 42);
 }

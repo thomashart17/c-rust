@@ -1,8 +1,7 @@
-![os](https://img.shields.io/badge/os-linux-orange?logo=linux)
-
-[![CI](https://github.com/thomashart17/c-rust/actions/workflows/main.yml/badge.svg)](https://github.com/thomashart17/c-rust/actions?query=workflow%3ACI)
-
 # c-rust
+
+![os](https://img.shields.io/badge/os-linux-orange?logo=linux)
+[![CI](https://github.com/thomashart17/c-rust/actions/workflows/main.yml/badge.svg)](https://github.com/thomashart17/c-rust/actions?query=workflow%3ACI)
 
 Building this project will first require installations of Rust, cbindgen and LLVM 14
 
@@ -95,6 +94,22 @@ As a prerequisite, follow [this guide](https://github.com/seahorn/seahorn/tree/m
     ```bash
     cmake --build .
     ```
+
+## Custom Print Functions
+
+To avoid increased runtime for jobs using print macros, custom print macros can overwrite the standard print macros and remove their functionality. To use these macros in a job, simply include `sea` in the job and call the following macro:
+
+```rust
+sea::define_print_macros!();
+```
+
+You will also have to update the job's `Cargo.toml` file to add the `custom_print` library as a dependecy:
+
+```toml
+[dependencies.custom-print]
+version = "0.1.0"
+default-features = false
+```
 
 ## Build Process
 

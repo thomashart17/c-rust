@@ -4,10 +4,6 @@
 
 
 int main() {
-    int vec_len = vec_test();
-    printf("Vec len: %d\r\n", vec_len);
-
-    sassert(vec_len == 5);
-
+    entrypt();
     return 42;
 }

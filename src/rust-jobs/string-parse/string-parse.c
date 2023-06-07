@@ -4,9 +4,6 @@
 #include "inc/lib.h"
 
 int main() {
-    int result = string_parse();
-
-    sassert(result == 42);
-
+    entrypt();
     return 42;
 }

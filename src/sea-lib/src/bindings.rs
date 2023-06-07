@@ -58,3 +58,6 @@ extern "C" {
 extern "C" {
   pub fn sea_nd_bool() -> bool;
 }
+extern "C" {
+    pub fn sea_printf(fmt: *const ::core::ffi::c_char, ...);
+}

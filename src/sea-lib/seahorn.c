@@ -30,3 +30,5 @@ void *sea_realloc(void *ptr, size_t sz) {
 }
 
 void *realloc(void *ptr, size_t sz) { return sea_realloc(ptr, sz); }
+
+void sea_printf( const char* format, ... ) { return; }

@@ -1,31 +1,55 @@
 #![no_std]
 pub use sea;
+// use sea::nd_i32;
 
 extern crate alloc;
 use alloc::string::String;
+use core::ffi::c_int;
+
+#[no_mangle]
+pub extern "C" fn entrypt() {
+    let x = sea::nd_i32();
+    unsafe {
+        sea::sea_printf("x, res *************************".as_ptr() as *const i8, (x >= 0) as c_int, x);
+    }
+    let res = check_and_return(x);
+    unsafe {
+        sea::sea_printf("x, res *************************".as_ptr() as *const i8, x, res);
+    }
+    if x >= 0 {
+        unsafe {
+            sea::sea_printf("x, res *************************".as_ptr() as *const i8, (x >= 0) as c_int, x, res);
+        }
+        sea::sassert!(res == x);
+    } else {
+        sea::sassert!(res == -1);
+    }
+   
+    // let mut x = sea_nd_arg();
+    // let res = check_and_return(x);
+    
+    // sea::assume(x >= 0);
+    // sea::sassert!(res == x);
+    // x = sea_nd_arg();
+    // sea::assume(x < 0);
+    // sea::sassert!(res == -1);
+}
 
 
 #[no_mangle]
-pub extern "C" fn divide_and_multiply(x: i32, y: i32) -> i32 {
-    let result = divide(x, y)
-        .and_then(multiply_by_two);
-
+extern "C" fn check_and_return(x: i32) -> i32 {
+    let result = check(x)
+        .and_then(return_value);
     match result {
         Ok(value) => value,
         Err(_) => -1,
     }
 }
 
-fn divide(a: i32, b: i32) -> Result<i32, String> {
-    if b == 0 {
-        Err(String::from("Cannot divide by zero"))
-    } else if a < 0 || b < 0 {
-        Err(String::from("Numbers must be positive"))
-    } else {
-        Ok(a / b)
-    }
+fn check(x: i32) -> Result<i32, String> {
+    if x >= 0 { Ok(x) }
+    else { Err(String::from("Error")) }
 }
 
-fn multiply_by_two(n: i32) -> Result<i32, String> {
-    Ok(n * 2)
-}
+fn return_value(x: i32) -> Result<i32, String> { Ok(x) }
+ 

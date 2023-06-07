@@ -17,3 +17,4 @@ pub mod error_handle;
 pub mod bindings;
 pub mod seahorn;
 pub use seahorn::*;
+pub use bindings::sea_printf;

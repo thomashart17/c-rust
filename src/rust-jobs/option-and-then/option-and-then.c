@@ -3,10 +3,9 @@
 #include "seahorn/seahorn.h"
 #include "inc/lib.h"
 
-extern void sea_printf(const char *format, ...);
-void sea_printf(const char *format, ...) {
-
-}
+// extern void sea_printf(const char *format, ...);
+// void sea_printf(const char *format, ...) {
+// }
 
 int sea_nd_int(void) {
     return 42;

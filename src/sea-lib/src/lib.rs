@@ -18,4 +18,3 @@ pub mod bindings;
 pub mod print_macros;
 pub mod seahorn;
 pub use seahorn::*;
-pub use bindings::sea_printf;

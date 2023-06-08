@@ -1,38 +1,20 @@
 #![no_std]
 pub use sea;
-// use sea::nd_i32;
 
 extern crate alloc;
 use alloc::string::String;
-use core::ffi::c_int;
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
+    sea::sea_printf!("sea_printf! macro test", 5, 5, 9);
+
     let x = sea::nd_i32();
-    unsafe {
-        sea::sea_printf("x, res *************************".as_ptr() as *const i8, (x >= 0) as c_int, x);
-    }
     let res = check_and_return(x);
-    unsafe {
-        sea::sea_printf("x, res *************************".as_ptr() as *const i8, x, res);
-    }
     if x >= 0 {
-        unsafe {
-            sea::sea_printf("x, res *************************".as_ptr() as *const i8, (x >= 0) as c_int, x, res);
-        }
         sea::sassert!(res == x);
     } else {
         sea::sassert!(res == -1);
     }
-   
-    // let mut x = sea_nd_arg();
-    // let res = check_and_return(x);
-    
-    // sea::assume(x >= 0);
-    // sea::sassert!(res == x);
-    // x = sea_nd_arg();
-    // sea::assume(x < 0);
-    // sea::sassert!(res == -1);
 }
 
 

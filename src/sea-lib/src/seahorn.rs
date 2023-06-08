@@ -25,6 +25,16 @@ pub fn nd_bool() -> bool {
 }
 
 #[macro_export]
+macro_rules! sea_printf {
+    ($message:expr $(, $args:expr)*) => {{
+        use crate::sea::bindings::sea_printf;
+        unsafe {
+            sea_printf($message.as_ptr() as *const i8, $($args),*);
+        }
+    }}
+}
+
+#[macro_export]
 macro_rules! sassert {
     ($cond:expr) => {{
         if !$cond {

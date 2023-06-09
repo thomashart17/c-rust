@@ -7,11 +7,9 @@ use core::result::Result;
 
 use sea;
 
-sea::define_sea_nd!(sea_nd_int, i32, 42);
-
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let v: i32 = sea_nd_int();
+    let v: i32 = sea::nd_i32();
 
     let x: Result<String, i32> = Err(v);
     let y: Result<&str, &i32> = Err(&v);

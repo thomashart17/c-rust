@@ -3,11 +3,12 @@ pub use sea;
 extern crate alloc;
 use alloc::vec::Vec;
 
-sea::define_sea_nd!(sea_nd_u8, u8, 42);
+// sea::define_sea_nd!(sea_nd_u8, u8, 42);
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let v: u8 = sea_nd_u8();
+    // let v: u8 = sea_nd_u8();
+    let v = sea::nd_u8();
 
     let capacity: usize = v as usize;
     let mut nums: Vec<Option<u32>> = Vec::with_capacity(capacity);

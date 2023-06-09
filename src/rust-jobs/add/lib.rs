@@ -4,9 +4,6 @@ pub use sea;
 
 sea::define_custom_print!();
 
-// Define a sea_nd function
-sea::define_sea_nd!(sea_nd_arg, i32, 42);
-
 // Entry point for the proof
 #[no_mangle]
 pub extern "C" fn entrypt() {
@@ -17,7 +14,7 @@ pub extern "C" fn entrypt() {
 #[no_mangle]
 fn test_test1() {
     println!("Hello, test1!");
-    let v = sea_nd_arg();
+    let v = sea::nd_i32();
     sea::assume(v >= 1);
     let res = add(v, 7);
 
@@ -31,7 +28,7 @@ fn test_test1() {
 #[no_mangle]
 fn test_test2() {
     println!("Hello, test2!");
-    let v = sea_nd_arg();
+    let v = sea::nd_i32();
     sea::assume(v >= 1);
     let res = add(v, 8);
 

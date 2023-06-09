@@ -1,7 +1,6 @@
 #![no_std]
 
 use sea;
-sea::define_sea_nd!(sea_nd_arg, i32, 42);
 
 use core::fmt::{self, Arguments};
 
@@ -23,7 +22,7 @@ macro_rules! eprintln { ($($args:tt)*) => { ceprintln!($($args)*); } }
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let v: i32 = sea_nd_arg();
+    let v: i32 = sea::nd_i32();
     sea::assume(v >= 1);
     let result: i32 = v * 2;
 

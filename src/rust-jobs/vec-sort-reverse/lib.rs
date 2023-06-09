@@ -5,13 +5,11 @@ extern crate alloc;
 use alloc::vec;
 use alloc::vec::Vec;
 
-sea::define_sea_nd!(sea_nd_int, i32, 42);
-
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let x: i32 = sea_nd_int();
-    let y: i32 = sea_nd_int();
-    let z: i32 = sea_nd_int();
+    let x: i32 = sea::nd_i32();
+    let y: i32 = sea::nd_i32();
+    let z: i32 = sea::nd_i32();
 
     sea::assume((x <= y) && (x <= z));
 

@@ -2,8 +2,6 @@
 
 use sea;
 
-sea::define_sea_nd!(sea_nd_arg, i32, 42);
-
 macro_rules! print { ($($args:tt)*) => { } }
 macro_rules! println { ($($args:tt)*) => { } }
 macro_rules! eprint { ($($args:tt)*) => { } }
@@ -11,7 +9,7 @@ macro_rules! eprintln { ($($args:tt)*) => { } }
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let v: i32 = sea_nd_arg();
+    let v: i32 = sea::nd_i32();
     sea::assume(v >= 1);
     let result: i32 = v * 2;
 

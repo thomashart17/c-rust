@@ -5,7 +5,7 @@ use std::mem;
 use std::ptr::NonNull;
 use std::ptr;
 
-sea::define_sea_nd!(sea_nd_usize, usize, 42);
+// sea::define_sea_nd!(sea_nd_usize, usize, 42);
 
 pub struct CustomVec<T> {
     ptr: NonNull<T>,
@@ -110,7 +110,7 @@ fn test_new() {
 
 #[no_mangle]
 fn test_grow() {
-    let original = sea_nd_usize();
+    let original = sea::nd_usize();
 
     let mut v: CustomVec<i32> = CustomVec::new();
     v.len = original;
@@ -124,7 +124,7 @@ fn test_grow() {
 
 #[no_mangle]
 fn test_push() {
-    let original = sea_nd_usize();
+    let original = sea::nd_usize();
 
     let mut v: CustomVec<i32> = CustomVec::new();
     v.len = original;
@@ -138,7 +138,7 @@ fn test_push() {
 
 #[no_mangle]
 fn test_pop() {
-    let original = sea_nd_usize();
+    let original = sea::nd_usize();
 
     let mut v: CustomVec<i32> = CustomVec::new();
     v.len = original;
@@ -152,7 +152,7 @@ fn test_pop() {
 
 #[no_mangle]
 fn test_drop() {
-    let original = sea_nd_usize();
+    let original = sea::nd_usize();
 
     let mut v: CustomVec<i32> = CustomVec::new();
     v.len = original;

@@ -15,33 +15,31 @@ pub fn assume(v: bool) {
 }
 
 #[no_mangle]
-pub fn nd_i32() -> i32 {
-    unsafe { sea_nd_i32() }
-}
+pub fn nd_i32() -> i32 { unsafe { sea_nd_i32() } }
+#[no_mangle]
+pub fn nd_u32() -> u32 { unsafe { sea_nd_u32() } }
+#[no_mangle]
+pub fn nd_i8() -> i8 { unsafe { sea_nd_i8() } }
+#[no_mangle]
+pub fn nd_u8() -> u8 { unsafe { sea_nd_u8() } }
+#[no_mangle]
+pub fn nd_usize() -> usize { unsafe { sea_nd_usize() } }
 
 #[no_mangle]
-pub fn nd_bool() -> bool {
-    unsafe { sea_nd_bool() }
-}
+pub fn nd_bool() -> bool { unsafe { sea_nd_bool() } }
 
 #[macro_export]
 macro_rules! sea_printf {
     ($message:expr $(, $args:expr)*) => {{
         use crate::sea::bindings::sea_printf;
+        use core::ffi::c_char;
+
         unsafe {
-            sea_printf($message.as_ptr() as *const i8, $($args),*);
+            sea_printf($message.as_ptr() as *const c_char, $($args),*);
         }
     }}
 }
 
-#[macro_export]
-macro_rules! sassert {
-    ($cond:expr) => {{
-        if !$cond {
-            sea::verifier_error();
-        }
-    }};
-}
 
 /// Defines `sea_nd` function that returns nd value
 ///
@@ -61,18 +59,28 @@ macro_rules! sassert {
 /// # Example
 ///
 /// define_sea_nd!(sea_nd_foo, i32, 42);
-///
+
 #[macro_export]
-macro_rules! define_sea_nd {
-    ($name:ident,$typ:ty,$val:expr) => {
-        #[no_mangle]
-        #[inline(never)]
-        pub extern "C" fn $name() -> $typ {
-            if sea::nd_bool() {
-                <$typ>::default()
-            } else {
-                $val
-            }
+macro_rules! sassert {
+    ($cond:expr) => {{
+        if !$cond {
+            sea::verifier_error();
         }
-    };
+    }};
 }
+
+
+// #[macro_export]
+// macro_rules! define_sea_nd {
+//     ($name:ident,$typ:ty,$val:expr) => {
+//         #[no_mangle]
+//         #[inline(never)]
+//         pub extern "C" fn $name() -> $typ {
+//             if sea::nd_bool() {
+//                 <$typ>::default()
+//             } else {
+//                 $val
+//             }
+//         }
+//     };
+// }

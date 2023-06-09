@@ -1,11 +1,9 @@
 #![no_std]
 use sea;
 
-sea::define_sea_nd!(sea_nd_int, i32, 42);
-
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let mut v: i32  = sea_nd_int();
+    let mut v: i32  = sea::nd_i32();
     sea::assume(v > 0);
     let original: i32 = v;
 

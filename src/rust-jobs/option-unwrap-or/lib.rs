@@ -1,11 +1,10 @@
 #![no_std]
 use sea;
 
-sea::define_sea_nd!(sea_nd_int, i32, 42);
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let v: i32 = sea_nd_int();
+    let v: i32 = sea::nd_i32();
 
     let result: Option<i32> = if (v & 1) == 1 { 
         None 

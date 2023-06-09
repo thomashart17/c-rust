@@ -1,3 +1,15 @@
+use sea;
+
+#[no_mangle]
+pub extern "C" fn entrypt() {
+    let x = sea::nd_i32();
+    let res = iter_mut(x);
+    if x >= 0 {
+        sea::sassert!(res == x);
+    } else {
+        sea::sassert!(res == x*2);
+    }
+}
 
 #[no_mangle]
 pub extern "C" fn iter_mut(input: i32) -> i32 {

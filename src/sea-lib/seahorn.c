@@ -20,6 +20,10 @@ void __SEA_assume(bool b) { return; }
 void __VERIFIER_assert(bool pred) {}
 
 int32_t sea_nd_i32(void) { return 0; }
+uint32_t sea_nd_u32(void) { return 0;}
+int8_t sea_nd_i8(void) { return 0; }
+uint8_t sea_nd_u8(void) { return 0;}
+size_t sea_nd_usize(void) { return 0; }
 
 bool sea_nd_bool(void) { return true; }
 

@@ -33,6 +33,8 @@ pub fn nd_u64() -> u64 { unsafe { sea_nd_u64() } }
 #[no_mangle]
 pub fn nd_usize() -> usize { unsafe { sea_nd_usize() } }
 #[no_mangle]
+pub fn nd_intptr() -> isize { unsafe { sea_nd_intptr() } }
+#[no_mangle]
 pub fn nd_uintptr() -> usize { unsafe { sea_nd_uintptr() } }
 
 #[no_mangle]

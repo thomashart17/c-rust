@@ -86,6 +86,7 @@ impl<T> Drop for CustomVec<T> {
         if self.cap != 0 {
             while let Some(_) = self.pop() { }
             let layout = Layout::array::<T>(self.cap).unwrap();
+            // 
             unsafe {
                 dealloc(self.ptr.as_ptr() as *mut u8, layout);
             }

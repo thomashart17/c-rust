@@ -140,7 +140,7 @@ def main(argv):
                 print(' '.join(cmd))
             # NOTE: Only return if exepectation is given AND
             # we are in vacuity mode else exec
-            if not (args.expect is not None and args.vac):
+            if args.expect is None:
                 os.execv(cmd[0], cmd)
 
             import subprocess

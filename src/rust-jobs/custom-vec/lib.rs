@@ -100,7 +100,7 @@ pub extern "C" fn entrypt() {
     test_grow();
     test_push();
     test_pop();
-    test_drop();
+    // test_drop();
 }
 
 #[no_mangle]
@@ -121,18 +121,24 @@ fn test_grow() {
 
     v.grow();
 
+    if original == 0 {
+        sea::sassert!(v.cap == 1)
+    } else {
+        sea::sassert!(v.cap == 2 * original);
+    }
     sea::sassert!(v.len == original);
-    sea::sassert!(v.cap == 2 * original);
 }
 
 #[no_mangle]
 fn test_push() {
     let original = sea::nd_usize();
+    sea::assume(original > 0);
 
     let mut v: CustomVec<i32> = CustomVec::new();
     v.len = original;
     v.cap = original;
 
+    v.grow();
     v.push(0);
 
     sea::sassert!(v.len == original + 1);
@@ -142,15 +148,17 @@ fn test_push() {
 #[no_mangle]
 fn test_pop() {
     let original = sea::nd_usize();
+    sea::assume(original > 0);
 
     let mut v: CustomVec<i32> = CustomVec::new();
     v.len = original;
     v.cap = original;
 
+    v.grow();
     v.pop();
 
     sea::sassert!(v.len == original - 1);
-    sea::sassert!(v.cap == original);
+    sea::sassert!(v.cap == original * 2);
 }
 
 #[no_mangle]

@@ -15,15 +15,25 @@ pub fn assume(v: bool) {
 }
 
 #[no_mangle]
-pub fn nd_i32() -> i32 { unsafe { sea_nd_i32() } }
-#[no_mangle]
-pub fn nd_u32() -> u32 { unsafe { sea_nd_u32() } }
-#[no_mangle]
 pub fn nd_i8() -> i8 { unsafe { sea_nd_i8() } }
 #[no_mangle]
 pub fn nd_u8() -> u8 { unsafe { sea_nd_u8() } }
 #[no_mangle]
+pub fn nd_i16() -> i16 { unsafe { sea_nd_i16() } }
+#[no_mangle]
+pub fn nd_u16() -> u16 { unsafe { sea_nd_u16() } }
+#[no_mangle]
+pub fn nd_i32() -> i32 { unsafe { sea_nd_i32() } }
+#[no_mangle]
+pub fn nd_u32() -> u32 { unsafe { sea_nd_u32() } }
+#[no_mangle]
+pub fn nd_i64() -> i64 { unsafe { sea_nd_i64() } }
+#[no_mangle]
+pub fn nd_u64() -> u64 { unsafe { sea_nd_u64() } }
+#[no_mangle]
 pub fn nd_usize() -> usize { unsafe { sea_nd_usize() } }
+#[no_mangle]
+pub fn nd_uintptr() -> usize { unsafe { sea_nd_uintptr() } }
 
 #[no_mangle]
 pub fn nd_bool() -> bool { unsafe { sea_nd_bool() } }

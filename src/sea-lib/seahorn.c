@@ -19,11 +19,16 @@ void __SEA_assume(bool b) { return; }
 
 void __VERIFIER_assert(bool pred) {}
 
-int32_t sea_nd_i32(void) { return 0; }
-uint32_t sea_nd_u32(void) { return 0;}
 int8_t sea_nd_i8(void) { return 0; }
 uint8_t sea_nd_u8(void) { return 0;}
+int16_t sea_nd_i16(void) { return 0; }
+uint16_t sea_nd_u16(void) { return 0;}
+int32_t sea_nd_i32(void) { return 0; }
+uint32_t sea_nd_u32(void) { return 0;}
+int64_t sea_nd_i64(void) { return 0; }
+uint64_t sea_nd_u64(void) { return 0;}
 size_t sea_nd_usize(void) { return 0; }
+uintptr_t sea_nd_uintptr(void) {return 0; }
 
 bool sea_nd_bool(void) { return true; }
 

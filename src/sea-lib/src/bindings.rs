@@ -52,11 +52,18 @@ extern "C" {
     ) -> c_char;
 }
 
-extern "C" { pub fn sea_nd_i32() -> i32; }
-extern "C" { pub fn sea_nd_u32() -> u32; }
 extern "C" { pub fn sea_nd_i8() -> i8; }
 extern "C" { pub fn sea_nd_u8() -> u8; }
+extern "C" { pub fn sea_nd_i16() -> i16; }
+extern "C" { pub fn sea_nd_u16() -> u16; }
+extern "C" { pub fn sea_nd_i32() -> i32; }
+extern "C" { pub fn sea_nd_u32() -> u32; }
+extern "C" { pub fn sea_nd_i64() -> i64; }
+extern "C" { pub fn sea_nd_u64() -> u64; }
 extern "C" { pub fn sea_nd_usize() -> usize; }
+extern "C" { pub fn sea_nd_uintptr() -> usize; }
+
+
 
 extern "C" {
   pub fn sea_nd_bool() -> bool;

@@ -1,11 +1,13 @@
+#![no_std]
 use sea;
 
-use std::alloc::{self, Layout};
-use std::mem;
-use std::ptr::NonNull;
-use std::ptr;
+extern crate alloc;
+use alloc::alloc::{Layout, alloc, realloc, dealloc, handle_alloc_error};
 
-// sea::define_sea_nd!(sea_nd_usize, usize, 42);
+use core::mem;
+use core::ptr::NonNull;
+use core::ptr;
+
 
 pub struct CustomVec<T> {
     ptr: NonNull<T>,
@@ -41,17 +43,17 @@ impl<T> CustomVec<T> {
         assert!(new_layout.size() <= isize::MAX as usize, "Allocation too large");
 
         let new_ptr = if self.cap == 0 {
-            unsafe { alloc::alloc(new_layout) }
+            unsafe { alloc(new_layout) }
         } else {
             let old_layout = Layout::array::<T>(self.cap).unwrap();
             let old_ptr = self.ptr.as_ptr() as *mut u8;
-            unsafe { alloc::realloc(old_ptr, old_layout, new_layout.size()) }
+            unsafe { realloc(old_ptr, old_layout, new_layout.size()) }
         };
 
         // If allocation fails, `new_ptr` will be null, in which case we abort.
         self.ptr = match NonNull::new(new_ptr as *mut T) {
             Some(p) => p,
-            None => alloc::handle_alloc_error(new_layout),
+            None => handle_alloc_error(new_layout),
         };
         self.cap = new_cap;
     }
@@ -85,7 +87,7 @@ impl<T> Drop for CustomVec<T> {
             while let Some(_) = self.pop() { }
             let layout = Layout::array::<T>(self.cap).unwrap();
             unsafe {
-                alloc::dealloc(self.ptr.as_ptr() as *mut u8, layout);
+                dealloc(self.ptr.as_ptr() as *mut u8, layout);
             }
         }
     }

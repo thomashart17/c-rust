@@ -4,6 +4,7 @@
         "custom-print",
         "custom-print-no-std",
         "custom-print-writer",
+        "custom-vec",
         "empty-print",
         "enum-as-param",
         "option",

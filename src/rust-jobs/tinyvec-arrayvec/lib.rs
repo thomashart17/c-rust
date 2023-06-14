@@ -7,7 +7,7 @@ use tinyvec::ArrayVec;
 #[no_mangle]
 pub extern "C" fn entrypt() {
     let v: u8 = sea::nd_u8();
-    sea::assume(v < 11);
+    sea::assume(v <= 12);
     match v {
         0 => test_append(),
         1 => test_clear(),
@@ -19,7 +19,9 @@ pub extern "C" fn entrypt() {
         7 => test_remove(),
         8 => test_set_len(),
         9 => test_split_off(),
-        10 => test_truncate(),
+        10 => test_swap_remove(),
+        11 => test_truncate(),
+        12 => test_try_append(),
         _ => ()
     }
 }
@@ -217,6 +219,29 @@ fn test_split_off() {
 }
 
 #[no_mangle]
+fn test_swap_remove() {
+    let mut v: ArrayVec<[u32; 2]> = ArrayVec::new();
+    v.push(1);
+    v.push(2);
+
+    v.swap_remove(0);
+
+    sea::sassert!(v.len() == 1);
+    sea::sassert!(v.capacity() == 2);
+
+    v.swap_remove(0);
+
+    sea::sassert!(v.len() == 0);
+    sea::sassert!(v.capacity() == 2);
+
+    // v is empty, so this should panic.
+    v.swap_remove(0);
+
+    // This assertion should not be reachable since the call to remove panics.
+    sea::sassert!(false);
+}
+
+#[no_mangle]
 fn test_truncate() {
     let val: usize = sea::nd_usize();
     sea::assume(val <= 5);
@@ -238,4 +263,35 @@ fn test_truncate() {
 
     sea::sassert!(v.len() == val);
     sea::sassert!(v.capacity() == 5);
+}
+
+#[no_mangle]
+fn test_try_append() {
+    let mut v1: ArrayVec<[u32; 6]> = ArrayVec::new();
+    let mut v2: ArrayVec<[u32; 6]> = ArrayVec::new();
+    let mut v3: ArrayVec<[u32; 6]> = ArrayVec::new();
+
+    v1.push(1);
+    v1.push(2);
+    v1.push(3);
+
+    v2.push(4);
+    v2.push(5);
+    v2.push(6);
+
+    v3.push(7);
+    v3.push(8);
+    v3.push(9);
+
+    let result: Option<&mut ArrayVec<[u32; 6]>> = v1.try_append(&mut v2);
+
+    sea::sassert!(result.is_none());
+    sea::sassert!(v1.len() == 6);
+    sea::sassert!(v2.len() == 0);
+
+    let result = v1.try_append(&mut v3);
+
+    sea::sassert!(result.is_some());
+    sea::sassert!(v1.len() == 6);
+    sea::sassert!(v3.len() == 3);
 }

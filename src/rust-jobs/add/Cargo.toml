@@ -18,7 +18,3 @@ features = ["panic_error"]
 
 [features]
 default = []
-
-[dependencies.custom-print]
-version = "0.1.0"
-default-features = false

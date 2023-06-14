@@ -95,20 +95,15 @@ As a prerequisite, follow [this guide](https://github.com/seahorn/seahorn/tree/m
     cmake --build .
     ```
 
-## Custom Print Functions
+## Custom Print Macros
 
-To avoid increased runtime for jobs using print macros, custom print macros can overwrite the standard print macros and remove their functionality. To use these macros in a job, simply include `sea` in the job and call the following macro:
+To avoid increased runtime for jobs using print macros, custom print macros can overwrite the standard print macros and remove their functionality. These macros are defined in `sea` and can be imported as follows:
 
 ```rust
-sea::define_print_macros!();
-```
-
-You will also have to update the job's `Cargo.toml` file to add the `custom_print` library as a dependecy:
-
-```toml
-[dependencies.custom-print]
-version = "0.1.0"
-default-features = false
+use sea::print;
+use sea::println;
+use sea::eprint;
+use sea::eprintln;
 ```
 
 ## Build Process

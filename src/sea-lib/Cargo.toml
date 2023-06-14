@@ -13,6 +13,10 @@ crate-type = ["staticlib", "lib"]
 libc = "0.2"
 sea = { version = "0.1.0", optional = true }
 
+[dependencies.custom-print]
+version = "1.0.0"
+default-features = false
+
 [features]
 default = []  # Specify other default features here, if any
 std = []

@@ -1,8 +1,7 @@
 // #[cfg(feature = "feature_no_std")]
 #![no_std]
 pub use sea;
-
-sea::define_custom_print!();
+use sea::println;
 
 // Entry point for the proof
 #[no_mangle]

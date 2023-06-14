@@ -22,6 +22,7 @@
         "result-transpose",
         "result-unwrap_or_else",
         "string-parse",
+        "tinyvec-arrayvec",
         "vec",
         "vec-filter",
         "vec-sort-reverse"

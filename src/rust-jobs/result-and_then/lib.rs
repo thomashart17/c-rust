@@ -4,7 +4,6 @@ pub use sea;
 extern crate alloc;
 use alloc::string::String;
 
-// sea::define_sea_nd!(sea_nd_int, i32, 42);
 
 #[no_mangle]
 pub extern "C" fn entrypt() {

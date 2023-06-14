@@ -6,14 +6,22 @@ use tinyvec::ArrayVec;
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    test_append();
-    test_clear();
-    test_fill();
-    test_new();
-    test_pop();
-    test_push();
-    test_set_len();
-    test_truncate();
+    let v: u8 = sea::nd_u8();
+    sea::assume(v < 11);
+    match v {
+        0 => test_append(),
+        1 => test_clear(),
+        2 => test_fill(),
+        3 => test_insert(),
+        4 => test_new(),
+        5 => test_pop(),
+        6 => test_push(),
+        7 => test_remove(),
+        8 => test_set_len(),
+        9 => test_split_off(),
+        10 => test_truncate(),
+        _ => ()
+    }
 }
 
 #[no_mangle]
@@ -71,6 +79,32 @@ fn test_fill() {
 }
 
 #[no_mangle]
+fn test_insert() {
+    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
+    v.push(1);
+    v.push(3);
+    
+    v.insert(1, 2);
+
+    sea::sassert!(v.len() == 3);
+    sea::sassert!(v.capacity() == 5);
+
+    if sea::nd_bool() {
+        // Index is greater than length, so insertion should panic.
+        v.insert(4, 4);
+    } else {
+        v.push(4);
+        v.push(5);
+
+        // Vector is at capacity, so insertion should panic.
+        v.insert(1, 1);
+    }
+
+    // This assertion should not be reachable as the previous insertion should panic.
+    sea::sassert!(false);
+}
+
+#[no_mangle]
 fn test_new() {
     let v: ArrayVec<[u32; 0]> = ArrayVec::new();
     
@@ -125,6 +159,24 @@ fn test_push() {
 }
 
 #[no_mangle]
+fn test_remove() {
+    let mut v: ArrayVec<[u32; 2]> = ArrayVec::new();
+    v.push(1);
+    v.push(2);
+
+    v.remove(1);
+
+    sea::sassert!(v.len() == 1);
+    sea::sassert!(v.capacity() == 2);
+
+    // Index is out of range, so removal should panic.
+    v.remove(1);
+
+    // This assertion should not be reachable since the call to remove panics.
+    sea::sassert!(false);
+}
+
+#[no_mangle]
 fn test_set_len() {
     let val: usize = sea::nd_usize();
     sea::assume(val <= 10);
@@ -139,6 +191,28 @@ fn test_set_len() {
     v.set_len(20);
 
     // This assertion should not be reachable since the previous operation panics.
+    sea::sassert!(false);
+}
+
+#[no_mangle]
+fn test_split_off() {
+    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
+
+    v.push(1);
+    v.push(2);
+    v.push(3);
+    v.push(4);
+    v.push(5);
+
+    let v2: ArrayVec<[u32; 5]> = v.split_off(2);
+
+    sea::sassert!(v.len() == 2);
+    sea::sassert!(v2.len() == 3);
+
+    // Index is out of range, so this should panic.
+    let _: ArrayVec<[u32; 5]> = v.split_off(3);
+
+    // This assertion should not be reachable since the previous opration should panic.
     sea::sassert!(false);
 }
 

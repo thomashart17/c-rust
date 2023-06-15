@@ -7,21 +7,24 @@ use tinyvec::ArrayVec;
 #[no_mangle]
 pub extern "C" fn entrypt() {
     let v: u8 = sea::nd_u8();
-    sea::assume(v <= 12);
     match v {
-        0 => test_append(),
-        1 => test_clear(),
-        2 => test_fill(),
-        3 => test_insert(),
-        4 => test_new(),
-        5 => test_pop(),
-        6 => test_push(),
-        7 => test_remove(),
-        8 => test_set_len(),
-        9 => test_split_off(),
-        10 => test_swap_remove(),
-        11 => test_truncate(),
-        12 => test_try_append(),
+        0  => test_append(),
+        1  => test_clear(),
+        2  => test_drain(),
+        3  => test_extend_from_slice(),
+        4  => test_fill(),
+        5  => test_insert(),
+        6  => test_new(),
+        7  => test_pop(),
+        8  => test_push(),
+        9  => test_remove(),
+        10 => test_set_len(),
+        11 => test_split_off(),
+        12 => test_swap_remove(),
+        13 => test_truncate(),
+        14 => test_try_append(),
+        15 => test_try_insert(),
+        16 => test_try_push(),
         _ => ()
     }
 }
@@ -62,6 +65,67 @@ fn test_clear() {
     let x: u32 = sea::nd_u32();
     let result: u32 = x * 2;
     sea::sassert!(result >= x);
+}
+
+#[no_mangle]
+fn test_drain() {
+    let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
+
+    v1.push(1);
+    v1.push(2);
+    v1.push(3);
+    v1.push(4);
+
+    let mut v2: ArrayVec<[u32; 4]> = v1.drain(1..).collect();
+
+    sea::sassert!(v1.len() == 1);
+    sea::sassert!(v2.len() == 3);
+
+    let v3: ArrayVec<[u32; 4]> = v1.drain(1..).collect();
+
+    sea::sassert!(v1.len() == 1);
+    sea::sassert!(v3.len() == 0);
+
+    let v4: ArrayVec<[u32; 4]> = v2.drain(1..2).collect();
+
+    sea::sassert!(v2.len() == 2);
+    sea::sassert!(v4.len() == 1);
+
+    if sea::nd_bool() {
+        let _: ArrayVec<[u32; 4]> = v1.drain(5..).collect();
+    } else {
+        let _: ArrayVec<[u32; 4]> = v1.drain(3..2).collect();
+    }
+
+    // This assertion should not be reachable since the previous call to drain should panic.
+    sea::sassert!(false);
+}
+
+#[no_mangle]
+fn test_extend_from_slice() {
+    let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
+    let mut v2: ArrayVec<[u32; 4]> = ArrayVec::new();
+    let mut v3: ArrayVec<[u32; 4]> = ArrayVec::new();
+
+    v1.push(1);
+    v1.push(2);
+    
+    v2.push(3);
+    v2.push(4);
+
+    v3.push(5);
+    v3.push(6);
+
+    v1.extend_from_slice(v2.as_slice());
+
+    sea::sassert!(v1.len() == 4);
+    sea::sassert!(v2.len() == 2);
+
+    // This causes v1 to overflow so it should panic.
+    v1.extend_from_slice(v3.as_slice());
+
+    // This assertion should not be reachable since the previous operation should panic.
+    sea::sassert!(false);
 }
 
 #[no_mangle]
@@ -294,4 +358,47 @@ fn test_try_append() {
     sea::sassert!(result.is_some());
     sea::sassert!(v1.len() == 6);
     sea::sassert!(v3.len() == 3);
+}
+
+#[no_mangle]
+fn test_try_insert() {
+    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
+    v.push(1);
+    v.push(3);
+    
+    let result: Option<u32> = v.try_insert(1, 2);
+
+    sea::sassert!(result.is_none());
+    sea::sassert!(v.len() == 3);
+    sea::sassert!(v.capacity() == 5);
+
+    if sea::nd_bool() {
+        // Index is greater than length, so insertion should panic.
+        v.try_insert(4, 4);
+
+        // This assertion should not be reachable as the previous insertion should panic.
+        sea::sassert!(false);
+    } else {
+        v.push(4);
+        v.push(5);
+
+        let result: Option<u32> = v.try_insert(1, 1);
+
+        sea::sassert!(result.is_some());
+    }
+}
+
+#[no_mangle]
+fn test_try_push() {
+    let mut v: ArrayVec<[u32; 1]> = ArrayVec::new();
+
+    let result: Option<u32> = v.try_push(1);
+    
+    sea::sassert!(result.is_none());
+    sea::sassert!(v.len() == 1);
+    
+    let result: Option<u32> = v.try_push(2);
+
+    sea::sassert!(result.is_some());
+    sea::sassert!(v.len() == 1);
 }

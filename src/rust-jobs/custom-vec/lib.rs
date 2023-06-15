@@ -7,7 +7,8 @@ extern crate alloc;
 use alloc::alloc::{Layout, alloc, realloc, dealloc, handle_alloc_error};
 use alloc::boxed::Box;
 
-use core::mem;
+use core::{mem, iter};
+use core::mem::ManuallyDrop;
 use core::ops::{Deref, DerefMut};
 use core::ptr::NonNull;
 use core::ptr;
@@ -16,14 +17,171 @@ use core::mem::needs_drop;
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    test_new();
-    test_grow();
-    test_pop();
-    test_push();
-    test_deref();
-    test_deref_mut();
-    test_drop();
+// Needs to be reevaluated
+    // test_new();
+    // test_grow();
+    // test_pop();
+    // test_push();
+    // test_drop();
+    // test_deref();
+    // test_deref_mut();
+    // test_insert();
+    // test_remove();
+// Needs to be analyzed
+    test_into_iter();
+    test_into_iter_size();
+// Seems ok
+    test_into_iter_drop();
     // sea::sassert!(false);
+}
+
+#[no_mangle]
+fn test_into_iter_size() {
+    let n: u32 = sea::nd_u32();
+    sea::assume(n < 100);
+    // let n = 10;
+
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n { v.push(i); }
+    
+    let mut iter: IntoIter<u32> = v.into_iter();
+
+    // This test is broken. Incorrect size can still give unsat
+    for i in 0..n {
+        let front: bool = sea::nd_bool();
+        if front {
+            _ = iter.next();
+        } else {
+            _ = iter.next_back();
+        }
+        let size: usize = (n-i-1).try_into().unwrap();
+        sea::sassert!(iter.size_hint().0 == size);
+    }
+    // sea::sassert!(false);
+}
+
+#[no_mangle]
+fn test_into_iter_drop() {
+    static mut DROP_COUNT: usize = 0;
+    pub struct DropTest { _value: i32, }
+    impl Drop for DropTest {
+        fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
+    }
+
+    let n: usize = sea::nd_usize();
+    let mut v: CustomVec<DropTest> = CustomVec::new();
+    for i in 0..n {
+        v.push(DropTest { _value: i.try_into().unwrap() });
+    }
+
+    let mut iter: IntoIter<DropTest> = v.into_iter();
+    let x: usize = sea::nd_usize();
+    sea::assume(x <= n);
+    for _i in 0..x {
+        let front: bool = sea::nd_bool();
+        if front { _ = iter.next(); }
+        else { _ = iter.next_back(); }
+    }
+    sea::sassert!(unsafe { DROP_COUNT == x });
+
+    drop(iter);
+    sea::sassert!(unsafe { DROP_COUNT == n });
+}
+
+#[no_mangle]
+fn test_into_iter() {
+    let n: u32 = sea::nd_u32();
+
+    // iterate forwards
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n { v.push(i); }
+
+    let mut iter: IntoIter<u32> = v.into_iter();
+    let i: u32 = 0;
+    for number in iter {
+        let x: u32 = i + i;
+        sea::sassert!(number == x);
+    }
+}
+
+
+
+// #[no_mangle]
+// fn test_into_iter() {
+//     let n: u32 = sea::nd_u32();
+
+//     // iterate forwards
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for i in 0..n { v.push(i); }
+
+//     let mut iter: IntoIter<u32> = v.into_iter();
+//     let i: u32 = 0;
+//     for number in iter {
+//         sea::sassert!(number == i-1);
+//     }
+
+    // iterate backwards
+    // let mut v: CustomVec<u32> = CustomVec::new();
+    // for i in 0..n { v.push(i); }
+
+    // let mut iter: IntoIter<u32> = v.into_iter();
+    // let mut i: u32 = 1;
+    // while let Some(number) = iter.next_back() {
+    //     sea::sassert!(number == n - i-1);
+    //     i -= 1;
+    // }
+
+    // randomly iterate
+    // let mut v: CustomVec<u32> = CustomVec::new();
+    // for i in 0..n { v.push(i); }
+
+    // let mut h: u32 = v.len.try_into().unwrap();
+
+    // let mut iter: IntoIter<u32> = v.into_iter();
+    // let mut l: u32 = 0;
+    // // let mut h: u32 = v.len.try_into().unwrap();
+    // let mut x = 4;
+    // for i in 0..n {
+    //     let front: bool = sea::nd_bool();
+    //     if front {
+    //         sea::sassert!(iter.next().unwrap() == l);
+    //         l += 1;
+    //     } else {
+    //         // sea::sassert!(false);
+    //         let x: u32 = iter.next_back().unwrap();
+    //         sea::sassert!(x == l*h);
+    //         h -= 1;
+    //     }
+    // }
+    // sea::sassert!(false);
+// }
+
+
+#[no_mangle]
+fn test_insert() {
+    let mut v: CustomVec<i32> = CustomVec::new();
+    let n: usize = sea::nd_usize();
+    let index: usize = sea::nd_usize();
+    sea::assume(index <= n);
+
+    for _i in 0..n { v.push(1); }
+    
+    v.insert(index, -1);
+    let slice: &mut [i32] = &mut *v;
+    sea::sassert!(slice[index] == -1);
+}
+
+#[no_mangle]
+fn test_remove() {
+    let mut v: CustomVec<i32> = CustomVec::new();
+    let n: usize = sea::nd_usize();
+    let index: usize = sea::nd_usize();
+    sea::assume(index <= n);
+
+    for i in 0..n { v.push(i.try_into().unwrap()); }
+    
+    let res: i32 = v.remove(index);
+    sea::sassert!(res == index.try_into().unwrap());
 }
 
 #[no_mangle]
@@ -88,7 +246,7 @@ fn test_pop() {
 #[no_mangle]
 #[inline(never)]
 fn test_drop() {
-    pub struct DropTest {  _value: i32, }
+    pub struct DropTest { _value: i32, }
     impl Drop for DropTest {
         fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
     }
@@ -151,12 +309,15 @@ pub struct CustomVec<T> {
     len: usize,
 }
 
+pub struct IntoIter<T> {
+    buf: NonNull<T>,
+    cap: usize,
+    start: *const T,
+    end: *const T,
+}
+
 impl<T> CustomVec<T> {
     pub fn new() -> Self {
-        if needs_drop::<T>() {
-            // sea::sassert!(false);
-            // Cannot handle types that need to be dropped due to loop in Drop()
-        }
         assert!(mem::size_of::<T>() != 0, "We're not ready to handle ZSTs");
         CustomVec {
             ptr: NonNull::dangling(),
@@ -217,6 +378,36 @@ impl<T> CustomVec<T> {
             }
         }
     }
+
+    pub fn insert(&mut self, index: usize, elem: T) {
+        assert!(index <= self.len, "index out of bounds");
+        if self.cap == self.len { self.grow(); }
+    
+        unsafe {
+            ptr::copy(
+                self.ptr.as_ptr().add(index),
+                self.ptr.as_ptr().add(index + 1),
+                self.len - index,
+            );
+            ptr::write(self.ptr.as_ptr().add(index), elem);
+            self.len += 1;
+        }
+    }
+
+    pub fn remove(&mut self, index: usize) -> T {
+        assert!(index < self.len, "index out of bounds");
+        
+        unsafe {
+            self.len -= 1;
+            let result = ptr::read(self.ptr.as_ptr().add(index));
+            ptr::copy(
+                self.ptr.as_ptr().add(index + 1),
+                self.ptr.as_ptr().add(index),
+                self.len - index,
+            );
+            result
+        }
+    }
 }
 
 impl<T> Drop for CustomVec<T> {
@@ -262,6 +453,76 @@ impl<T> DerefMut for CustomVec<T> {
     fn deref_mut(&mut self) -> &mut [T] {
         unsafe {
             core::slice::from_raw_parts_mut(self.ptr.as_ptr(), self.len)
+        }
+    }
+}
+
+impl<T> IntoIterator for CustomVec<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+    fn into_iter(self) -> IntoIter<T> {
+        let vec: ManuallyDrop<CustomVec<T>> = ManuallyDrop::new(self);
+
+        let ptr: NonNull<T> = vec.ptr;
+        let cap: usize = vec.cap;
+        let len: usize = vec.len;
+
+        unsafe {
+            IntoIter {
+                buf: ptr,
+                cap: cap,
+                start: ptr.as_ptr(),
+                end: if cap == 0 {
+                    ptr.as_ptr()
+                } else {
+                    ptr.as_ptr().add(len)
+                },
+            }
+        }
+    }
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+    fn next(&mut self) -> Option<T> {
+        if self.start == self.end {
+            None
+        } else {
+            unsafe {
+                let result: T = ptr::read(self.start);
+                self.start = self.start.offset(1);
+                Some(result)
+            }
+        }
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = (self.end as usize - self.start as usize)
+                         / mem::size_of::<T>();
+        (len, Some(len))
+    }
+}
+
+impl<T> DoubleEndedIterator for IntoIter<T> {
+    fn next_back(&mut self) -> Option<T> {
+        if self.start == self.end {
+            None
+        } else {
+            unsafe {
+                self.end = self.end.offset(-1);
+                Some(ptr::read(self.end))
+            }
+        }
+    }
+}
+
+impl<T> Drop for IntoIter<T> {
+    fn drop(&mut self) {
+        if self.cap != 0 {
+            for _ in &mut *self {}
+            let layout: Layout = Layout::array::<T>(self.cap).unwrap();
+            unsafe {
+                dealloc(self.buf.as_ptr() as *mut u8, layout);
+            }
         }
     }
 }

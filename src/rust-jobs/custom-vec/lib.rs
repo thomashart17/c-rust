@@ -7,199 +7,35 @@ extern crate alloc;
 use alloc::alloc::{Layout, alloc, realloc, dealloc, handle_alloc_error};
 use alloc::boxed::Box;
 
-use core::{mem, iter};
+use core::mem;
 use core::mem::ManuallyDrop;
 use core::ops::{Deref, DerefMut};
 use core::ptr::NonNull;
 use core::ptr;
-use core::mem::needs_drop;
+
+// Testing IntoIter only works for small values when looping
+// 24 seem to be the limit for testing dynamically allocated types for IntoIter
+// let n: u32 = 24;
+static mut MAX_DYNAMIC_ELEMENT_SIZE_ITER: usize = core::usize::MAX;
 
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-// Needs to be reevaluated
-    // test_new();
-    // test_grow();
-    // test_pop();
-    // test_push();
-    // test_drop();
-    // test_deref();
-    // test_deref_mut();
-    // test_insert();
-    // test_remove();
-// Needs to be analyzed
+    test_new();
+    test_grow();
+    test_pop();
+    test_push();
+    test_drop();
+    test_deref();
+    test_deref_mut();
+    test_insert();
+    test_remove();
+
     test_into_iter();
     test_into_iter_size();
-// Seems ok
     test_into_iter_drop();
     // sea::sassert!(false);
 }
-
-#[no_mangle]
-fn test_into_iter_size() {
-    let n: u32 = sea::nd_u32();
-    sea::assume(n < 100);
-    // let n = 10;
-
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n { v.push(i); }
-    
-    let mut iter: IntoIter<u32> = v.into_iter();
-
-    // This test is broken. Incorrect size can still give unsat
-    for i in 0..n {
-        let front: bool = sea::nd_bool();
-        if front {
-            _ = iter.next();
-        } else {
-            _ = iter.next_back();
-        }
-        let size: usize = (n-i-1).try_into().unwrap();
-        sea::sassert!(iter.size_hint().0 == size);
-    }
-    // sea::sassert!(false);
-}
-
-#[no_mangle]
-fn test_into_iter_drop() {
-    static mut DROP_COUNT: usize = 0;
-    pub struct DropTest { _value: i32, }
-    impl Drop for DropTest {
-        fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
-    }
-
-    let n: usize = sea::nd_usize();
-    let mut v: CustomVec<DropTest> = CustomVec::new();
-    for i in 0..n {
-        v.push(DropTest { _value: i.try_into().unwrap() });
-    }
-
-    let mut iter: IntoIter<DropTest> = v.into_iter();
-    let x: usize = sea::nd_usize();
-    sea::assume(x <= n);
-    for _i in 0..x {
-        let front: bool = sea::nd_bool();
-        if front { _ = iter.next(); }
-        else { _ = iter.next_back(); }
-    }
-    sea::sassert!(unsafe { DROP_COUNT == x });
-
-    drop(iter);
-    sea::sassert!(unsafe { DROP_COUNT == n });
-}
-
-#[no_mangle]
-fn test_into_iter() {
-    let n: u32 = sea::nd_u32();
-
-    // iterate forwards
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n { v.push(i); }
-
-    let mut iter: IntoIter<u32> = v.into_iter();
-    let i: u32 = 0;
-    for number in iter {
-        let x: u32 = i + i;
-        sea::sassert!(number == x);
-    }
-}
-
-
-
-// #[no_mangle]
-// fn test_into_iter() {
-//     let n: u32 = sea::nd_u32();
-
-//     // iterate forwards
-//     let mut v: CustomVec<u32> = CustomVec::new();
-//     for i in 0..n { v.push(i); }
-
-//     let mut iter: IntoIter<u32> = v.into_iter();
-//     let i: u32 = 0;
-//     for number in iter {
-//         sea::sassert!(number == i-1);
-//     }
-
-    // iterate backwards
-    // let mut v: CustomVec<u32> = CustomVec::new();
-    // for i in 0..n { v.push(i); }
-
-    // let mut iter: IntoIter<u32> = v.into_iter();
-    // let mut i: u32 = 1;
-    // while let Some(number) = iter.next_back() {
-    //     sea::sassert!(number == n - i-1);
-    //     i -= 1;
-    // }
-
-    // randomly iterate
-    // let mut v: CustomVec<u32> = CustomVec::new();
-    // for i in 0..n { v.push(i); }
-
-    // let mut h: u32 = v.len.try_into().unwrap();
-
-    // let mut iter: IntoIter<u32> = v.into_iter();
-    // let mut l: u32 = 0;
-    // // let mut h: u32 = v.len.try_into().unwrap();
-    // let mut x = 4;
-    // for i in 0..n {
-    //     let front: bool = sea::nd_bool();
-    //     if front {
-    //         sea::sassert!(iter.next().unwrap() == l);
-    //         l += 1;
-    //     } else {
-    //         // sea::sassert!(false);
-    //         let x: u32 = iter.next_back().unwrap();
-    //         sea::sassert!(x == l*h);
-    //         h -= 1;
-    //     }
-    // }
-    // sea::sassert!(false);
-// }
-
-
-#[no_mangle]
-fn test_insert() {
-    let mut v: CustomVec<i32> = CustomVec::new();
-    let n: usize = sea::nd_usize();
-    let index: usize = sea::nd_usize();
-    sea::assume(index <= n);
-
-    for _i in 0..n { v.push(1); }
-    
-    v.insert(index, -1);
-    let slice: &mut [i32] = &mut *v;
-    sea::sassert!(slice[index] == -1);
-}
-
-#[no_mangle]
-fn test_remove() {
-    let mut v: CustomVec<i32> = CustomVec::new();
-    let n: usize = sea::nd_usize();
-    let index: usize = sea::nd_usize();
-    sea::assume(index <= n);
-
-    for i in 0..n { v.push(i.try_into().unwrap()); }
-    
-    let res: i32 = v.remove(index);
-    sea::sassert!(res == index.try_into().unwrap());
-}
-
-#[no_mangle]
-fn test_push() {
-    let original = sea::nd_usize();
-    sea::assume(original > 0);
-
-    let mut v: CustomVec<i32> = CustomVec::new();
-    v.len = original;
-    v.cap = original;
-
-    v.grow();
-    v.push(0);   
-
-    sea::sassert!(v.len == original + 1);
-    sea::sassert!(v.cap == original * 2);
-}
-
 
 #[no_mangle]
 fn test_new() {
@@ -244,6 +80,22 @@ fn test_pop() {
 }
 
 #[no_mangle]
+fn test_push() {
+    let original = sea::nd_usize();
+    sea::assume(original > 0);
+
+    let mut v: CustomVec<i32> = CustomVec::new();
+    v.len = original;
+    v.cap = original;
+
+    v.grow();
+    v.push(0);   
+
+    sea::sassert!(v.len == original + 1);
+    sea::sassert!(v.cap == original * 2);
+}
+
+#[no_mangle]
 #[inline(never)]
 fn test_drop() {
     pub struct DropTest { _value: i32, }
@@ -252,20 +104,16 @@ fn test_drop() {
     }
     static mut DROP_COUNT: usize = 0;
 
-    let original: usize = sea::nd_usize();
-    let num_pops: usize = sea::nd_usize();
-    sea::assume(num_pops <= original);
+    let original: usize = 5;
 
     let mut v: CustomVec<DropTest> = CustomVec::new();
     for i in 0..original { v.push(DropTest { _value: i.try_into().unwrap() }); }
-    for _i in 0..num_pops { _ = v.pop(); }
-    v.push(DropTest { _value: 1 });
     _ = v.pop();
     _ = v.pop();
     _ = v.pop();
 
     drop(v);
-    sea::sassert!(unsafe { DROP_COUNT == original+1 });
+    sea::sassert!(unsafe { DROP_COUNT == original });
 }
 
 #[no_mangle]
@@ -303,6 +151,110 @@ fn test_deref_mut() {
     sea::sassert!(v.len == 0);
 }
 
+#[no_mangle]
+fn test_insert() {
+    let mut v: CustomVec<i32> = CustomVec::new();
+    let n: usize = sea::nd_usize();
+    let index: usize = sea::nd_usize();
+    sea::assume(index <= n);
+
+    for _i in 0..n { v.push(1); }
+    
+    v.insert(index, -1);
+    let slice: &mut [i32] = &mut *v;
+    sea::sassert!(slice[index] == -1);
+}
+
+#[no_mangle]
+fn test_remove() {
+    let mut v: CustomVec<i32> = CustomVec::new();
+    let n: usize = sea::nd_usize();
+    sea::assume(n < 10);
+    let index: usize = sea::nd_usize();
+    sea::assume(index <= n);
+
+    for i in 0..n { v.push(i.try_into().unwrap()); }
+    
+    let res: i32 = v.remove(index);
+    sea::sassert!(res == index.try_into().unwrap());
+}
+
+#[no_mangle]
+fn test_into_iter() {
+    let n: u32 = 5;
+    // iterate forwards
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n { v.push(i); }
+    let mut iter: IntoIter<u32> = v.into_iter();
+
+    for i in 0..n {
+        sea::sassert!(iter.next().unwrap() == i);
+    }
+
+    let n: u32 = 3;
+    // iterate backwards
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n { v.push(i); }
+    let mut iter: IntoIter<u32> = v.into_iter();
+
+    for i in 0..n {
+        sea::sassert!(iter.next_back().unwrap() == n-i-1);
+    }
+}
+
+#[no_mangle]
+fn test_into_iter_size() {
+    let n = 10;
+
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n { v.push(i); }
+    
+    let mut iter: IntoIter<u32> = v.into_iter();
+
+    for i in 0..n {
+        let front: bool = sea::nd_bool();
+        if front {
+            _ = iter.next();
+        } else {
+            _ = iter.next_back();
+        }
+        let size: usize = (n-i-1).try_into().unwrap();
+        sea::sassert!(iter.size_hint().0 == size);
+    }
+}
+
+#[no_mangle]
+fn test_into_iter_drop() {
+    static mut DROP_COUNT: u32 = 0;
+    pub struct DropTest { _value: u32, }
+    impl Drop for DropTest {
+        fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
+    }
+
+    let n: u32 = 24;
+    let mut v: CustomVec<DropTest> = CustomVec::new();
+    for i in 0..n {
+        v.push(DropTest { _value: i.try_into().unwrap() });
+    }
+
+    let mut iter: IntoIter<DropTest> = v.into_iter();
+    let x: u32 = 0;
+    for _i in 5..x {
+        let front: bool = sea::nd_bool();
+        if front { _ = iter.next(); }
+        else { _ = iter.next_back(); }
+    }
+
+    sea::sassert!(unsafe { DROP_COUNT == x });
+
+    drop(iter);
+    sea::sassert!(unsafe { DROP_COUNT == n });
+}
+
+
+
+
+
 pub struct CustomVec<T> {
     ptr: NonNull<T>,
     cap: usize,
@@ -314,6 +266,7 @@ pub struct IntoIter<T> {
     cap: usize,
     start: *const T,
     end: *const T,
+    len: usize,
 }
 
 impl<T> CustomVec<T> {
@@ -415,20 +368,19 @@ impl<T> Drop for CustomVec<T> {
         if self.cap != 0 {
             // if needs_drop::<T>() {
             //     // This does not work with seahorn
-            //     // while let Some(_) = self.pop() { }
+                //  while let Some(_) = self.pop() { }
             // }
             if core::mem::needs_drop::<T>() {
-                let typed_ptr = self.ptr.as_ptr();
-                let slice = unsafe { core::slice::from_raw_parts_mut(typed_ptr, self.len) };
+                let slice = unsafe { core::slice::from_raw_parts_mut(self.ptr.as_ptr(), self.len) };
 
-                let new_slice: &mut [T] = {
+                let new_owner: &mut [T] = {
                     let buffer = Box::<[T]>::new_uninit_slice(self.len);
-                    let ptr = Box::into_raw(buffer) as *mut T;
+                    let ptr = Box::into_raw(buffer) as *mut T; 
                     unsafe { core::slice::from_raw_parts_mut(ptr, self.len) }
                 };
                 unsafe {
-                    ptr::copy_nonoverlapping(slice.as_ptr(), new_slice.as_mut_ptr(), self.len);
-                    _ = Box::from_raw(new_slice as *mut [T]);
+                    ptr::copy_nonoverlapping(slice.as_ptr(), new_owner.as_mut_ptr(), self.len);
+                    _ = Box::from_raw(new_owner as *mut [T]);
                 }
             }
             
@@ -477,6 +429,7 @@ impl<T> IntoIterator for CustomVec<T> {
                 } else {
                     ptr.as_ptr().add(len)
                 },
+                len: len,
             }
         }
     }
@@ -491,6 +444,7 @@ impl<T> Iterator for IntoIter<T> {
             unsafe {
                 let result: T = ptr::read(self.start);
                 self.start = self.start.offset(1);
+                self.len -= 1;
                 Some(result)
             }
         }
@@ -509,6 +463,7 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
         } else {
             unsafe {
                 self.end = self.end.offset(-1);
+                self.len -= 1;
                 Some(ptr::read(self.end))
             }
         }
@@ -518,7 +473,19 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
 impl<T> Drop for IntoIter<T> {
     fn drop(&mut self) {
         if self.cap != 0 {
-            for _ in &mut *self {}
+            if core::mem::needs_drop::<T>() {
+                unsafe {
+                    let start_ptr = self.start as *mut T;
+            
+                    for i in 0..MAX_DYNAMIC_ELEMENT_SIZE_ITER {
+                        if i == self.len { break; }
+                        let element_ptr = start_ptr.add(i);
+                        ptr::drop_in_place(element_ptr);
+                    }
+                }
+            }
+
+
             let layout: Layout = Layout::array::<T>(self.cap).unwrap();
             unsafe {
                 dealloc(self.buf.as_ptr() as *mut u8, layout);

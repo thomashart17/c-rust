@@ -13,19 +13,27 @@ pub extern "C" fn entrypt() {
         2  => test_drain(),
         3  => test_extend_from_slice(),
         4  => test_fill(),
-        5  => test_insert(),
-        6  => test_new(),
-        7  => test_pop(),
-        8  => test_push(),
-        9  => test_remove(),
-        10 => test_set_len(),
-        11 => test_split_off(),
-        12 => test_swap_remove(),
-        13 => test_truncate(),
-        14 => test_try_append(),
-        15 => test_try_insert(),
-        16 => test_try_push(),
-        _ => ()
+        5  => test_from_array_empty(),
+        6  => test_from_array_len(),
+        // 7  => test_grab_spare_slice(),
+        8  => test_insert(),
+        9  => test_new(),
+        10 => test_pop(),
+        11 => test_push(),
+        12 => test_remove(),
+        13 => test_resize(),
+        14 => test_resize_with(),
+        15 => test_retain(),
+        16 => test_set_len(),
+        // 17 => test_splice(),
+        18 => test_split_off(),
+        19 => test_swap_remove(),
+        20 => test_truncate(),
+        21 => test_try_append(),
+        22 => test_try_from_array_len(),
+        23 => test_try_insert(),
+        24 => test_try_push(),
+        _  => ()
     }
 }
 
@@ -145,6 +153,64 @@ fn test_fill() {
 }
 
 #[no_mangle]
+fn test_from_array_empty() {
+    let v: ArrayVec<[u32; 5]> = ArrayVec::from_array_empty([0; 5]);
+
+    sea::sassert!(v.len() == 0);
+
+    // Necessary to make seahorn work.
+    let x: u32 = sea::nd_u32();
+    let result: u32 = x * 2;
+    sea::sassert!(result >= x);
+}
+
+#[no_mangle]
+fn test_from_array_len() {
+    let v: ArrayVec<[u32; 5]> = ArrayVec::from_array_len([0; 5], 3);
+
+    sea::sassert!(v.len() == 3);
+
+    // Necessary to make seahorn work.
+    let x: u32 = sea::nd_u32();
+    let result: u32 = x * 2;
+    sea::sassert!(result >= x);
+    // *******************************
+
+    // Specified length is smaller than capacity of array, so this should panic.
+    let _: ArrayVec<[u32; 5]> = ArrayVec::from_array_len([0; 5], 10);
+
+    // This assertion should be unreachable since the previous operation panics.
+    sea::sassert!(false);
+}
+
+// Documentation lists this as a function, but the compiler says it doesn't exist.
+// https://docs.rs/tinyvec/latest/tinyvec/struct.ArrayVec.html#method.grab_spare_slice
+/*
+#[no_mangle]
+fn test_grab_spare_slice() {
+    let mut v: ArrayVec<[u32; 4]> = ArrayVec::new();
+
+    let slice = v.grab_spare_slice();
+
+    sea::sassert!(slice.len() == 4);
+
+    v.push(1);
+    v.push(2);
+
+    let slice = v.grab_spare_slice();
+
+    sea::sassert!(slice.len() == 2);
+
+    v.push(3);
+    v.push(4);
+
+    let slice = v.grab_spare_slice();
+
+    sea::sassert!(slice.len() == 0);
+}
+*/
+
+#[no_mangle]
 fn test_insert() {
     let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
     v.push(1);
@@ -243,6 +309,74 @@ fn test_remove() {
 }
 
 #[no_mangle]
+fn test_resize() {
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
+
+    v.push(1);
+    v.resize(4, Default::default());
+
+    sea::sassert!(v.len() == 4);
+    sea::sassert!(v[3] == Default::default());
+
+    v.resize(2, 1);
+
+    sea::sassert!(v.len() == 2);
+    sea::sassert!(v[1] == Default::default());
+
+    // This is larger than the capacity of the vector and should panic.
+    v.resize(16, Default::default());
+
+    // This assertion should not be reachable since the previous operation should panic.
+    sea::sassert!(false);
+}
+
+#[no_mangle]
+fn test_resize_with() {
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
+
+    v.push(1);
+    v.resize_with(4, || { Default::default() });
+
+    sea::sassert!(v.len() == 4);
+    sea::sassert!(v[3] == Default::default());
+
+    v.resize_with(2, || { 1 });
+
+    sea::sassert!(v.len() == 2);
+    sea::sassert!(v[1] == Default::default());
+
+    // This is larger than the capacity of the vector and should panic.
+    v.resize_with(16, || { Default::default() });
+
+    // This assertion should not be reachable since the previous operation should panic.
+    sea::sassert!(false);
+}
+
+#[no_mangle]
+fn test_retain() {
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
+
+    v.push(1);
+    v.push(2);
+    v.push(3);
+    v.push(4);
+    v.push(5);
+    v.push(6);
+    v.push(7);
+    v.push(8);
+
+    v.retain(|&x| (x & 1) == 0);
+
+    sea::sassert!(v.len() == 4);
+    sea::sassert!(v.capacity() == 8);
+
+    v.retain(|&x| x > 8);
+
+    sea::sassert!(v.len() == 0);
+    sea::sassert!(v.capacity() == 8);
+}
+
+#[no_mangle]
 fn test_set_len() {
     let val: usize = sea::nd_usize();
     sea::assume(val <= 10);
@@ -259,6 +393,44 @@ fn test_set_len() {
     // This assertion should not be reachable since the previous operation panics.
     sea::sassert!(false);
 }
+
+// #[no_mangle]
+// fn test_splice() {
+//     let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
+
+//     v1.push(1);
+//     v1.push(2);
+//     v1.push(3);
+//     v1.push(4);
+
+//     let v2: ArrayVec<[u32; 4]> = v1.splice(1..3, 5..=6).collect();
+
+//     sea::sassert!(v1.len() == 4);
+//     sea::sassert!(v2.len() == 2);
+//     sea::sassert!(v1[1] == 5);
+//     sea::sassert!(v1[2] == 6);
+//     sea::sassert!(v2[0] == 2);
+//     sea::sassert!(v2[1] == 3);
+
+//     let v2: ArrayVec<[u32; 4]> = v1.splice(1..1, 5..5).collect();
+
+//     sea::sassert!(v1.len() == 4);
+//     sea::sassert!(v2.len() == 0);
+
+//     if sea::nd_bool() {
+//         // Start is greater than end, so panic should occur.
+//         let _: ArrayVec<[u32; 4]> = v1.splice(2..1, 1..2).collect();
+//     } else if sea::nd_bool() {
+//         // End is past end of vector, so panic should occur.
+//         let _: ArrayVec<[u32; 4]> = v1.splice(1..8, 1..2).collect();
+//     } else {
+//         // New length would overflow the vector, so panic should occur.
+//         let _: ArrayVec<[u32; 4]> = v1.splice(1..2, 1..4).collect();
+//     }
+
+//     // This assertion should not be reachable since the previous assertion should panic. 
+//     sea::sassert!(false);
+// }
 
 #[no_mangle]
 fn test_split_off() {
@@ -358,6 +530,23 @@ fn test_try_append() {
     sea::sassert!(result.is_some());
     sea::sassert!(v1.len() == 6);
     sea::sassert!(v3.len() == 3);
+}
+
+#[no_mangle]
+fn test_try_from_array_len() {
+    let v: Result<ArrayVec<[u32; 5]>, _> = ArrayVec::try_from_array_len([0; 5], 3);
+
+    sea::sassert!(v.is_ok());
+    sea::sassert!(v.unwrap().len() == 3);
+
+    let v2: Result<ArrayVec<[u32; 5]>, _> = ArrayVec::try_from_array_len([0; 5], 10);
+
+    sea::sassert!(v2.is_err());
+
+    // Necessary to make seahorn work.
+    let x: u32 = sea::nd_u32();
+    let result: u32 = x * 2;
+    sea::sassert!(result >= x);
 }
 
 #[no_mangle]

@@ -26,7 +26,7 @@ function(sea_discover_tests_impl TARGET BC VERIFY_CMD)
   file(REMOVE ${ctest_file})  # delete the existing CTestFile
   foreach(TEST_NAME ${TEST_NAMES_LIST})
       file(APPEND ${ctest_file} "add_test(${TARGET}_${TEST_NAME}_unsat_test
-            \"${VERIFY_CMD}\" \"--expect=unsat\" \"--entry-point=${TEST_NAME}\" \"${BC}\" )\n")
+            \"${VERIFY_CMD}\" \"--expect=unsat\" \"--entry=${TEST_NAME}\" \"${BC}\" )\n")
       message(STATUS "Added test: ${TARGET}_${TEST_NAME}_unsat_test")
   endforeach()
 endfunction()

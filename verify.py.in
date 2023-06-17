@@ -138,9 +138,9 @@ def main(argv):
 
             if args.verbose:
                 print(' '.join(cmd))
-            # NOTE: Only return if exepectation is given AND
-            # we are in vacuity mode else exec
-            if args.expect is None:
+            # NOTE: Only exec if exepectation is not given AND
+            # we are NOT in vacuity mode
+            if args.expect is None and (not args.vac):
                 os.execv(cmd[0], cmd)
 
             import subprocess

@@ -131,7 +131,6 @@ def main(argv):
 
             # # job specific config
             job_config = os.path.abspath(os.path.join(file_dir, 'sea.yaml'))
-            print(job_config)
             cmd.extend(['-y', job_config])
 
             if args.dry_run:

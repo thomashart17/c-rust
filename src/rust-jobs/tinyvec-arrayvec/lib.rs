@@ -39,70 +39,101 @@ pub extern "C" fn entrypt() {
 
 #[no_mangle]
 fn test_append() {
-    let mut v1: ArrayVec<[u32; 6]> = ArrayVec::new();
-    let mut v2: ArrayVec<[u32; 6]> = ArrayVec::new();
+    let mut v1: ArrayVec<[u32; 8]> = ArrayVec::new();
+    let mut v2: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v1.push(1);
-    v1.push(2);
-    v1.push(3);
+    let len1: usize = sea::nd_usize();
+    sea::assume(len1 <= 8);
 
-    v2.push(4);
-    v2.push(5);
-    v2.push(6);
+    let len2: usize = sea::nd_usize();
+    sea::assume(len2 <= 8);
+    
+    for _i in 0..len1 {
+        v1.push(sea::nd_u32());
+    }
+    
+    sea::sassert!(v1.len() == len1);
 
+    for _i in 0..len2 {
+        v2.push(sea::nd_u32());
+    }
+
+    sea::sassert!(v2.len() == len2);
+
+    // Panics if the capacity is exceeded.
     v1.append(&mut v2);
 
-    sea::sassert!(v1.len() == 6);
-    sea::sassert!(v2.len() == 0);
+    if len1 + len2 <= 8 {
+        sea::sassert!(v1.len() == len1 + len2);
+        sea::sassert!(v2.len() == 0);
+    } else {
+        // This assertion should not be reachable since the previous operation should panic.
+        sea::sassert!(false);
+    }
 }
 
 #[no_mangle]
 fn test_clear() {
-    let mut v: ArrayVec<[u32; 10]> = ArrayVec::new();
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.push(1);
-    v.push(2);
-    v.push(3);
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
+
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
 
     v.clear();
 
     sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 10);
-
-    // Necessary to make seahorn work.
-    let x: u32 = sea::nd_u32();
-    let result: u32 = x * 2;
-    sea::sassert!(result >= x);
+    sea::sassert!(v.capacity() == 8);
 }
 
 #[no_mangle]
 fn test_drain() {
-    let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
+    let mut v1: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v1.push(1);
-    v1.push(2);
-    v1.push(3);
-    v1.push(4);
+    let len: usize = sea::nd_usize();
+    sea::assume(len >= 2 && len <= 8);
 
-    let mut v2: ArrayVec<[u32; 4]> = v1.drain(1..).collect();
+    for _i in 0..len {
+        v1.push(sea::nd_u32());
+    }
 
-    sea::sassert!(v1.len() == 1);
-    sea::sassert!(v2.len() == 3);
+    let drain_point: usize = sea::nd_usize();
+    sea::assume(drain_point >= 1 && drain_point < len);
+    let mut v2: ArrayVec<[u32; 8]> = v1.drain(drain_point..).collect();
 
-    let v3: ArrayVec<[u32; 4]> = v1.drain(1..).collect();
+    sea::sassert!(v1.len() == drain_point);
+    sea::sassert!(v2.len() == len - drain_point);
 
-    sea::sassert!(v1.len() == 1);
+    let v3: ArrayVec<[u32; 8]> = v1.drain(drain_point..).collect();
+
+    sea::sassert!(v1.len() == drain_point);
     sea::sassert!(v3.len() == 0);
 
-    let v4: ArrayVec<[u32; 4]> = v2.drain(1..2).collect();
+    let drain_point2: usize = sea::nd_usize();
+    sea::assume(drain_point2 < len - drain_point);
+    let v4: ArrayVec<[u32; 8]> = v2.drain(drain_point2..len - drain_point).collect();
 
-    sea::sassert!(v2.len() == 2);
-    sea::sassert!(v4.len() == 1);
+    sea::sassert!(v2.len() == drain_point2);
+    sea::sassert!(v4.len() == len - drain_point - drain_point2);
 
     if sea::nd_bool() {
-        let _: ArrayVec<[u32; 4]> = v1.drain(5..).collect();
+        let drain_point3: usize = sea::nd_usize();
+        sea::assume(drain_point3 > drain_point);
+
+        // End is greater than length, so this should panic.
+        let _: ArrayVec<[u32; 8]> = v1.drain(drain_point3..).collect();
     } else {
-        let _: ArrayVec<[u32; 4]> = v1.drain(3..2).collect();
+        let drain_point3: usize = sea::nd_usize();
+        let drain_point4: usize = sea::nd_usize();
+        sea::assume(drain_point3 < drain_point);
+        sea::assume(drain_point4 < drain_point);
+        sea::assume(drain_point4 > drain_point3);
+
+        // Start is greater than end, so this should panic.
+        let _: ArrayVec<[u32; 4]> = v1.drain(drain_point4..drain_point3).collect();
     }
 
     // This assertion should not be reachable since the previous call to drain should panic.
@@ -111,50 +142,54 @@ fn test_drain() {
 
 #[no_mangle]
 fn test_extend_from_slice() {
-    let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
-    let mut v2: ArrayVec<[u32; 4]> = ArrayVec::new();
-    let mut v3: ArrayVec<[u32; 4]> = ArrayVec::new();
+    let mut v1: ArrayVec<[u32; 8]> = ArrayVec::new();
+    let mut v2: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v1.push(1);
-    v1.push(2);
+    let len1: usize = sea::nd_usize();
+    let len2: usize = sea::nd_usize();
 
-    v2.push(3);
-    v2.push(4);
+    sea::assume(len1 <= 8);
+    sea::assume(len2 <= 8);
 
-    v3.push(5);
-    v3.push(6);
+    for _i in 0..len1 {
+        v1.push(sea::nd_u32());
+    }
 
+    for _i in 0..len2 {
+        v2.push(sea::nd_u32());
+    }
+
+    // This should panic since len1 + len2 > 8.
     v1.extend_from_slice(v2.as_slice());
 
-    sea::sassert!(v1.len() == 4);
-    sea::sassert!(v2.len() == 2);
-
-    // This causes v1 to overflow so it should panic.
-    v1.extend_from_slice(v3.as_slice());
-
-    // This assertion should not be reachable since the previous operation should panic.
-    sea::sassert!(false);
+    if len1 + len2 <= 8 {
+        sea::sassert!(v1.len() == len1 + len2);
+        sea::sassert!(v2.len() == len2);
+    } else {
+        // This assertion should not be reachable since the previous operation should panic.
+        sea::sassert!(false);
+    }
 }
 
 #[no_mangle]
 fn test_fill() {
-    let val: u32 = sea::nd_u32();
-    sea::assume(val <= 10);
-    let mut v: ArrayVec<[u32; 10]> = ArrayVec::new();
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.fill(0..val);
+    v.fill(0..len as u32);
 
-    sea::sassert!(v.len() == val as usize);
-    sea::sassert!(v.capacity() == 10);
+    sea::sassert!(v.len() == len);
+    sea::sassert!(v.capacity() == 8);
 
-    for n in 0..val {
-        sea::sassert!(n == v[n as usize]);
+    for n in 0..len {
+        sea::sassert!(n as u32 == v[n]);
     }
 }
 
 #[no_mangle]
 fn test_from_array_empty() {
-    let v: ArrayVec<[u32; 5]> = ArrayVec::from_array_empty([0; 5]);
+    let v: ArrayVec<[u32; 8]> = ArrayVec::from_array_empty([0; 8]);
 
     sea::sassert!(v.len() == 0);
 
@@ -166,21 +201,24 @@ fn test_from_array_empty() {
 
 #[no_mangle]
 fn test_from_array_len() {
-    let v: ArrayVec<[u32; 5]> = ArrayVec::from_array_len([0; 5], 3);
+    let len: usize = sea::nd_usize();
 
-    sea::sassert!(v.len() == 3);
+    if len <= 8 {
+        let v: ArrayVec<[u32; 8]> = ArrayVec::from_array_len([0; 8], len);
+
+        sea::sassert!(v.len() == len);
+    } else {
+        // Specified length is larger than capacity of array, so this should panic.
+        let _: ArrayVec<[u32; 8]> = ArrayVec::from_array_len([0; 8], len);
+
+        // This assertion should be unreachable since the previous operation panics.
+        sea::sassert!(false);
+    }
 
     // Necessary to make seahorn work.
     let x: u32 = sea::nd_u32();
     let result: u32 = x * 2;
     sea::sassert!(result >= x);
-    // *******************************
-
-    // Specified length is smaller than capacity of array, so this should panic.
-    let _: ArrayVec<[u32; 5]> = ArrayVec::from_array_len([0; 5], 10);
-
-    // This assertion should be unreachable since the previous operation panics.
-    sea::sassert!(false);
 }
 
 // Documentation lists this as a function, but the compiler says it doesn't exist.
@@ -212,24 +250,35 @@ fn test_grab_spare_slice() {
 
 #[no_mangle]
 fn test_insert() {
-    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
-    v.push(1);
-    v.push(3);
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.insert(1, 2);
+    let len: usize = sea::nd_usize();
+    sea::assume(len > 0 && len <= 7);
+    
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
 
-    sea::sassert!(v.len() == 3);
-    sea::sassert!(v.capacity() == 5);
+    let insert_point: usize = sea::nd_usize();
+    sea::assume(insert_point < len);
+    v.insert(insert_point, sea::nd_u32());
 
-    if sea::nd_bool() {
+    sea::sassert!(v.len() == len + 1);
+    sea::sassert!(v.capacity() == 8);
+
+    if len < 6 {
+        let insert_point2: usize = sea::nd_usize();
+        sea::assume(insert_point2 > len + 1);
+
         // Index is greater than length, so insertion should panic.
-        v.insert(4, 4);
+        v.insert(insert_point2, sea::nd_u32());
     } else {
-        v.push(4);
-        v.push(5);
+        if len == 6 { v.push(sea::nd_u32()); }
+        let insert_point2: usize = sea::nd_usize();
+        sea::assume(insert_point2 <= 7);
 
         // Vector is at capacity, so insertion should panic.
-        v.insert(1, 1);
+        v.insert(insert_point2, sea::nd_u32());
     }
 
     // This assertion should not be reachable as the previous insertion should panic.
@@ -238,10 +287,10 @@ fn test_insert() {
 
 #[no_mangle]
 fn test_new() {
-    let v: ArrayVec<[u32; 0]> = ArrayVec::new();
+    let v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
     sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 0);
+    sea::sassert!(v.capacity() == 8);
 
     // Necessary to make seahorn work.
     let x: u32 = sea::nd_u32();
@@ -251,69 +300,54 @@ fn test_new() {
 
 #[no_mangle]
 fn test_pop() {
-    let val: u32 = sea::nd_u32();
-    let mut v: ArrayVec<[u32; 1]> = ArrayVec::new();
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.push(val);
-    let result: Option<u32> = v.pop();
+    let len: usize = sea::nd_usize();
+    sea::assume(len > 0 && len <= 8);
 
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(result.unwrap() == val);
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
+
+    for i in 0..len {
+        let result: Option<u32> = v.pop();
+        sea::sassert!(result.is_some());
+        sea::sassert!(v.len() == len - i - 1);
+    }
 
     let result: Option<u32> = v.pop();
 
     sea::sassert!(result.is_none());
-
-    // Necessary to make seahorn work.
-    let x: u32 = sea::nd_u32();
-    let result: u32 = x * 2;
-    sea::sassert!(result >= x);
 }
 
 #[no_mangle]
 fn test_push() {
-    let val: u32 = sea::nd_u32();
-    let mut v: ArrayVec<[u32; 1]> = ArrayVec::new();
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
 
-    v.push(val);
-    sea::sassert!(v.len() == 1);
+    for i in 0..len {
+        v.push(sea::nd_u32());
+        sea::sassert!(v.len() == i + 1);
+    }
 
-    // Necessary to make seahorn work.
-    let x: u32 = sea::nd_u32();
-    let result: u32 = x * 2;
-    sea::sassert!(result >= x);
-    // *******************************
+    sea::sassert!(v.len() == len);
+    sea::sassert!(v.capacity() == 8);
 
-    v.push(val);
+    if len == 8 {
+        // Vector is at capacity, so push should panic.
+        v.push(sea::nd_u32());
 
-    // This assertion should not be reachable since the previous push panics.
-    sea::sassert!(false);
+        // This assertion should not be reachable since the previous push panics.
+        sea::sassert!(false);
+    }
 }
-
-// TODO: Remove this version of test once panic has been migrated
-// #[no_mangle]
-// fn test_remove() {
-//     let mut v: ArrayVec<[u32; 2]> = ArrayVec::new();
-//     v.push(1);
-//     v.push(2);
-
-//     v.remove(1);
-
-//     sea::sassert!(v.len() == 1);
-//     sea::sassert!(v.capacity() == 2);
-
-//     // Index is out of range, so removal should panic.
-//     v.remove(1);
-
-//     // This assertion should not be reachable since the call to remove panics.
-//     sea::sassert!(false);
-// }
 
 #[no_mangle]
 fn test_remove() {
-    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
     let len: usize = sea::nd_usize();
-    sea::assume(2 <= len && len <= 5);
+    sea::assume(2 <= len && len <= 8);
 
     for _i in 0..len {
         v.push(sea::nd_u32());
@@ -325,7 +359,7 @@ fn test_remove() {
     v.remove(remove_point1);
 
     sea::sassert!(v.len() == len - 1);
-    sea::sassert!(v.capacity() == 5);
+    sea::sassert!(v.capacity() == 8);
 
     let remove_point2: usize = sea::nd_usize();
     sea::assume(remove_point2 < len);
@@ -333,33 +367,46 @@ fn test_remove() {
     v.remove(remove_point2);
 
     sea::sassert!(v.len() == len - 2);
-    sea::sassert!(v.capacity() == 5);
+    sea::sassert!(v.capacity() == 8);
 
-    // FIXME: Add back panic logic
-    // v is empty, so this should panic.
-    //v.swap_remove(0);
+    for i in 0..len - 2 {
+        v.remove(0);
+        sea::sassert!(v.len() == len - 3 - i);
+    }
+
+    // v is empty, so this should panic
+    v.remove(0);
 
     // This assertion should not be reachable since the call to remove panics.
-    // sea::sassert!(false);
+    sea::sassert!(false);
 }
 
 #[no_mangle]
 fn test_resize() {
     let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.push(1);
-    v.resize(4, Default::default());
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
 
-    sea::sassert!(v.len() == 4);
-    sea::sassert!(v[3] == Default::default());
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
 
-    v.resize(2, 1);
+    let resize_point: usize = sea::nd_usize();
+    sea::assume(resize_point <= 8);
+    v.resize(resize_point, sea::nd_u32());
 
-    sea::sassert!(v.len() == 2);
-    sea::sassert!(v[1] == Default::default());
+    sea::sassert!(v.len() == resize_point);
 
+    let resize_point2: usize = sea::nd_usize();
+    v.resize(resize_point2, sea::nd_u32());
+
+    sea::sassert!(v.len() == resize_point2);
+
+    let resize_point3: usize = sea::nd_usize();
+    sea::assume(resize_point3 > 8);
     // This is larger than the capacity of the vector and should panic.
-    v.resize(16, Default::default());
+    v.resize(resize_point3, sea::nd_u32());
 
     // This assertion should not be reachable since the previous operation should panic.
     sea::sassert!(false);
@@ -369,19 +416,28 @@ fn test_resize() {
 fn test_resize_with() {
     let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.push(1);
-    v.resize_with(4, || Default::default());
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
 
-    sea::sassert!(v.len() == 4);
-    sea::sassert!(v[3] == Default::default());
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
 
-    v.resize_with(2, || 1);
+    let resize_point: usize = sea::nd_usize();
+    sea::assume(resize_point <= 8);
+    v.resize_with(resize_point, || sea::nd_u32());
 
-    sea::sassert!(v.len() == 2);
-    sea::sassert!(v[1] == Default::default());
+    sea::sassert!(v.len() == resize_point);
 
+    let resize_point2: usize = sea::nd_usize();
+    v.resize_with(resize_point2, || sea::nd_u32());
+
+    sea::sassert!(v.len() == resize_point2);
+
+    let resize_point3: usize = sea::nd_usize();
+    sea::assume(resize_point3 > 8);
     // This is larger than the capacity of the vector and should panic.
-    v.resize_with(16, || Default::default());
+    v.resize_with(resize_point3, || sea::nd_u32());
 
     // This assertion should not be reachable since the previous operation should panic.
     sea::sassert!(false);
@@ -391,21 +447,25 @@ fn test_resize_with() {
 fn test_retain() {
     let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.push(1);
-    v.push(2);
-    v.push(3);
-    v.push(4);
-    v.push(5);
-    v.push(6);
-    v.push(7);
-    v.push(8);
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
+
+    for i in 1..=len {
+        let val: u32 = sea::nd_u32();
+        if (i & 1) == 0 {
+            sea::assume((val & 1) == 0);
+        } else {
+            sea::assume((val & 1) == 1);
+        }
+        v.push(val);
+    }
 
     v.retain(|&x| (x & 1) == 0);
 
-    sea::sassert!(v.len() == 4);
+    sea::sassert!(v.len() == len / 2);
     sea::sassert!(v.capacity() == 8);
 
-    v.retain(|&x| x > 8);
+    v.retain(|&x| (x & 1) == 1);
 
     sea::sassert!(v.len() == 0);
     sea::sassert!(v.capacity() == 8);
@@ -413,20 +473,19 @@ fn test_retain() {
 
 #[no_mangle]
 fn test_set_len() {
-    let val: usize = sea::nd_usize();
-    sea::assume(val <= 10);
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    let mut v: ArrayVec<[u32; 10]> = ArrayVec::new();
+    let len: usize = sea::nd_usize();
 
-    v.set_len(val);
+    v.set_len(len);
 
-    sea::sassert!(v.len() == val);
-    sea::sassert!(v.capacity() == 10);
-
-    v.set_len(20);
-
-    // This assertion should not be reachable since the previous operation panics.
-    sea::sassert!(false);
+    if len > 8 {
+        // This assertion should not be reachable since the previous operation panics.
+        sea::sassert!(false);
+    } else {
+        sea::sassert!(v.len() == len);
+        sea::sassert!(v.capacity() == 8);
+    }
 }
 
 // #[no_mangle]
@@ -469,24 +528,27 @@ fn test_set_len() {
 
 #[no_mangle]
 fn test_split_off() {
-    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v.push(1);
-    v.push(2);
-    v.push(3);
-    v.push(4);
-    v.push(5);
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
 
-    let v2: ArrayVec<[u32; 5]> = v.split_off(2);
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
 
-    sea::sassert!(v.len() == 2);
-    sea::sassert!(v2.len() == 3);
+    let split_point: usize = sea::nd_usize();
 
-    // Index is out of range, so this should panic.
-    let _: ArrayVec<[u32; 5]> = v.split_off(3);
+    // Panics if split_point > len.
+    let v2: ArrayVec<[u32; 8]> = v.split_off(split_point);
 
-    // This assertion should not be reachable since the previous opration should panic.
-    sea::sassert!(false);
+    if split_point > len {
+        // This assertion should not be reachable since the previous operation panics.
+        sea::sassert!(false);
+    } else {
+        sea::sassert!(v.len() == split_point);
+        sea::sassert!(v2.len() == len - split_point);
+    }
 }
 
 #[no_mangle]
@@ -515,79 +577,94 @@ fn test_swap_remove() {
     sea::sassert!(v.len() == len - 2);
     sea::sassert!(v.capacity() == 5);
 
-    // FIXME: Add back panic logic
-    // v is empty, so this should panic.
-    //v.swap_remove(0);
+    for i in 0..len - 2 {
+        v.swap_remove(0);
+        sea::sassert!(v.len() == len - 3 - i);
+    }
+
+    // v is empty, so this should panic
+    v.swap_remove(0);
 
     // This assertion should not be reachable since the call to remove panics.
-    // sea::sassert!(false);
+    sea::sassert!(false);
 }
 
 #[no_mangle]
 fn test_truncate() {
-    let val: usize = sea::nd_usize();
-    sea::assume(val <= 5);
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
 
-    v.push(1);
-    v.push(2);
-    v.push(3);
-    v.push(4);
-    v.push(5);
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
 
-    v.truncate(val);
+    let truncate_point: usize = sea::nd_usize();
+    sea::assume(truncate_point <= len);
 
-    sea::sassert!(v.len() == val);
-    sea::sassert!(v.capacity() == 5);
+    v.truncate(truncate_point);
 
-    v.truncate(10);
+    sea::sassert!(v.len() == truncate_point);
+    sea::sassert!(v.capacity() == 8);
 
-    sea::sassert!(v.len() == val);
-    sea::sassert!(v.capacity() == 5);
+    let truncate_point2: usize = sea::nd_usize();
+    sea::assume(truncate_point2 > truncate_point);
+    
+    v.truncate(truncate_point2);
+
+    sea::sassert!(v.len() == truncate_point);
+    sea::sassert!(v.capacity() == 8);
 }
 
 #[no_mangle]
 fn test_try_append() {
-    let mut v1: ArrayVec<[u32; 6]> = ArrayVec::new();
-    let mut v2: ArrayVec<[u32; 6]> = ArrayVec::new();
-    let mut v3: ArrayVec<[u32; 6]> = ArrayVec::new();
+    let mut v1: ArrayVec<[u32; 8]> = ArrayVec::new();
+    let mut v2: ArrayVec<[u32; 8]> = ArrayVec::new();
 
-    v1.push(1);
-    v1.push(2);
-    v1.push(3);
+    let len1: usize = sea::nd_usize();
+    sea::assume(len1 <= 8);
 
-    v2.push(4);
-    v2.push(5);
-    v2.push(6);
+    let len2: usize = sea::nd_usize();
+    sea::assume(len2 <= 8);
+    
+    for _i in 0..len1 {
+        v1.push(sea::nd_u32());
+    }
+    
+    sea::sassert!(v1.len() == len1);
 
-    v3.push(7);
-    v3.push(8);
-    v3.push(9);
+    for _i in 0..len2 {
+        v2.push(sea::nd_u32());
+    }
 
-    let result: Option<&mut ArrayVec<[u32; 6]>> = v1.try_append(&mut v2);
+    sea::sassert!(v2.len() == len2);
 
-    sea::sassert!(result.is_none());
-    sea::sassert!(v1.len() == 6);
-    sea::sassert!(v2.len() == 0);
+    let result: Option<&mut ArrayVec<[u32; 8]>> = v1.try_append(&mut v2);
 
-    let result = v1.try_append(&mut v3);
-
-    sea::sassert!(result.is_some());
-    sea::sassert!(v1.len() == 6);
-    sea::sassert!(v3.len() == 3);
+    if len1 + len2 <= 8 {
+        sea::sassert!(result.is_none());
+        sea::sassert!(v1.len() == len1 + len2);
+        sea::sassert!(v2.len() == 0);
+    } else {
+        sea::sassert!(result.is_some());
+        sea::sassert!(v1.len() == len1);
+        sea::sassert!(v2.len() == len2);
+    }
 }
 
 #[no_mangle]
 fn test_try_from_array_len() {
-    let v: Result<ArrayVec<[u32; 5]>, _> = ArrayVec::try_from_array_len([0; 5], 3);
+    let len: usize = sea::nd_usize();
 
-    sea::sassert!(v.is_ok());
-    sea::sassert!(v.unwrap().len() == 3);
+    let v: Result<ArrayVec<[u32; 8]>, _>  = ArrayVec::try_from_array_len([0; 8], len);
 
-    let v2: Result<ArrayVec<[u32; 5]>, _> = ArrayVec::try_from_array_len([0; 5], 10);
-
-    sea::sassert!(v2.is_err());
+    if len <= 8 {
+        sea::sassert!(v.is_ok());
+        sea::sassert!(v.unwrap().len() == len);
+    } else {
+        sea::sassert!(v.is_err());
+    }
 
     // Necessary to make seahorn work.
     let x: u32 = sea::nd_u32();
@@ -597,40 +674,41 @@ fn test_try_from_array_len() {
 
 #[no_mangle]
 fn test_try_insert() {
-    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
-    v.push(1);
-    v.push(3);
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
+    
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 8);
 
-    let result: Option<u32> = v.try_insert(1, 2);
-
-    sea::sassert!(result.is_none());
-    sea::sassert!(v.len() == 3);
-    sea::sassert!(v.capacity() == 5);
-
-    if sea::nd_bool() {
-        // Index is greater than length, so insertion should panic.
-        v.try_insert(4, 4);
-
-        // This assertion should not be reachable as the previous insertion should panic.
-        sea::sassert!(false);
-    } else {
-        v.push(4);
-        v.push(5);
-
-        let result: Option<u32> = v.try_insert(1, 1);
-
-        sea::sassert!(result.is_some());
+    for _i in 0..len {
+        v.push(sea::nd_u32());
     }
+
+    let insert_point: usize = sea::nd_usize();
+
+    let result: Option<u32> = v.try_insert(insert_point, sea::nd_u32());
+
+    if insert_point > len {
+        // This assertion should not be reachable since the previous operation panics.
+        sea::sassert!(false);
+    } else if len == 8 {
+        sea::sassert!(result.is_some());
+        sea::sassert!(v.len() == 8);
+        sea::sassert!(v.capacity() == 8);
+    } else {
+        sea::sassert!(result.is_none());
+        sea::sassert!(v.len() == len + 1);
+        sea::sassert!(v.capacity() == 8)
+    }    
 }
 
 #[no_mangle]
 fn test_try_push() {
     // NOTE: Create a vector of fixed size capacity
-    let mut v: ArrayVec<[u32; 5]> = ArrayVec::new();
+    let mut v: ArrayVec<[u32; 8]> = ArrayVec::new();
 
     // NOTE: Create a ND number of elements to push
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 5);
+    sea::assume(len <= 8);
 
     // NOTE: INVARIANT: We should always be able to push len elements since
     // len is <= capacity

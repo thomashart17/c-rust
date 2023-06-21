@@ -101,7 +101,7 @@ In order to use the project on Windows, a Docker container is used to run the pr
 
 1. Install and setup the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 2. Install [Docker Desktop for Windows](https://docs.docker.com/docker-for-windows/install/)
-3. Install the [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for VS Code
+3. Install the [Dev - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for VS Code
 4. From a command prompt, enter WSL using:
 
     ```cmd
@@ -142,7 +142,7 @@ In order to use the project on Windows, a Docker container is used to run the pr
 
 10. Open the project in VS Code
 
-    Once the container is running, open VS Code and select the `Remote-Containers: Attach to Running Container...` command from the command palette. Select the container that was just created and wait for the project to open.
+    Once the container is running, open VS Code and select the `Dev Containers: Attach to Running Container...` command from the command palette. Select the container that was just created and wait for the project to open.
 
 ## Custom Print Macros
 

@@ -8,6 +8,8 @@
     "rust-analyzer.linkedProjects": [
         "./src/sea-lib/Cargo.toml",
         "./src/sea-lib/Cargo.toml",
-        "./src/sea-lib/Cargo.toml"
+        "./src/sea-lib/Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml"
     ]
 }

@@ -1,7 +1,7 @@
 cargo-features = ["profile-rustflags"]
 
 [package]
-name = "custom-vec-simple-lib"
+name = "custom-vec-final-lib"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,7 +15,7 @@ libc = "0.2"
 [dependencies.sea]
 path = "../../sea-lib"
 default-features = false
-features = ["std"]
+features = []
 
 [features]
 default = []  # Specify other default features here, if any        

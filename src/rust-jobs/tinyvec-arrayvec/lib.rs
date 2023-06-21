@@ -25,14 +25,15 @@ pub extern "C" fn entrypt() {
         14 => test_resize_with(),
         15 => test_retain(),
         16 => test_set_len(),
-        // 17 => test_splice(),
-        18 => test_split_off(),
-        19 => test_swap_remove(),
-        20 => test_truncate(),
-        21 => test_try_append(),
-        22 => test_try_from_array_len(),
-        23 => test_try_insert(),
-        24 => test_try_push(),
+        17 => test_splice(),
+        18 => test_splice_panic(),
+        19 => test_split_off(),
+        20 => test_swap_remove(),
+        21 => test_truncate(),
+        22 => test_try_append(),
+        23 => test_try_from_array_len(),
+        24 => test_try_insert(),
+        25 => test_try_push(),
         _ => (),
     }
 }
@@ -488,43 +489,83 @@ fn test_set_len() {
     }
 }
 
-// #[no_mangle]
-// fn test_splice() {
-//     let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
+#[no_mangle]
+fn test_splice() {
+    let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
 
-//     v1.push(1);
-//     v1.push(2);
-//     v1.push(3);
-//     v1.push(4);
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 4);
 
-//     let v2: ArrayVec<[u32; 4]> = v1.splice(1..3, 5..=6).collect();
+    for _i in 0..len {
+        v1.push(sea::nd_u32());
+    }
 
-//     sea::sassert!(v1.len() == 4);
-//     sea::sassert!(v2.len() == 2);
-//     sea::sassert!(v1[1] == 5);
-//     sea::sassert!(v1[2] == 6);
-//     sea::sassert!(v2[0] == 2);
-//     sea::sassert!(v2[1] == 3);
+    let splice_point: usize = sea::nd_usize();
+    sea::assume(splice_point < len);
 
-//     let v2: ArrayVec<[u32; 4]> = v1.splice(1..1, 5..5).collect();
+    let val: u32 = sea::nd_u32();
 
-//     sea::sassert!(v1.len() == 4);
-//     sea::sassert!(v2.len() == 0);
+    let v2: ArrayVec<[u32; 4]> = v1.splice(splice_point.., val..val + len as u32 - splice_point as u32).collect();
 
-//     if sea::nd_bool() {
-//         // Start is greater than end, so panic should occur.
-//         let _: ArrayVec<[u32; 4]> = v1.splice(2..1, 1..2).collect();
-//     } else if sea::nd_bool() {
-//         // End is past end of vector, so panic should occur.
-//         let _: ArrayVec<[u32; 4]> = v1.splice(1..8, 1..2).collect();
-//     } else {
-//         // New length would overflow the vector, so panic should occur.
-//         let _: ArrayVec<[u32; 4]> = v1.splice(1..2, 1..4).collect();
-//     }
+    sea::sassert!(v1.len() == len);
+    sea::sassert!(v2.len() == len - splice_point);
 
-//     // This assertion should not be reachable since the previous assertion should panic.
-//     sea::sassert!(false);
-// }
+    let splice_point2: usize = sea::nd_usize();
+    sea::assume(splice_point2 < len);
+
+    let val: u32 = sea::nd_u32();
+
+    let v3: ArrayVec<[u32; 4]> = v1.splice(splice_point2..splice_point2, val..val).collect();
+
+    sea::sassert!(v1.len() == len);
+    sea::sassert!(v3.len() == 0);
+}
+
+#[no_mangle]
+fn test_splice_panic() {
+    let mut v1: ArrayVec<[u32; 4]> = ArrayVec::new();
+
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= 4);
+
+    for _i in 0..len {
+        v1.push(sea::nd_u32());
+    }
+
+    if sea::nd_bool() {
+        let splice_point3: usize = sea::nd_usize();
+        sea::assume(splice_point3 < len);
+
+        let splice_point4: usize = sea::nd_usize();
+        sea::assume(splice_point4 < splice_point3);
+
+        // Start is greater than end, so panic should occur.
+        let _: ArrayVec<[u32; 4]> = v1.splice(splice_point3..splice_point4, sea::nd_u32()..).collect();
+    } else if sea::nd_bool() {
+        let splice_point5: usize = sea::nd_usize();
+        sea::assume(splice_point5 > len);
+
+        let val: u32 = sea::nd_u32();
+
+        // End is past end of vector, so panic should occur.
+        let _: ArrayVec<[u32; 4]> = v1.splice(..splice_point5, val..val + splice_point5 as u32).collect();
+    } else {
+        let splice_point6: usize = sea::nd_usize();
+        sea::assume(splice_point6 < len);
+
+        for _i in 0..4-len {
+            v1.push(sea::nd_u32());
+        }
+
+        let val: u32 = sea::nd_u32();
+
+        // New length would overflow the vector, so panic should occur.
+        let _: ArrayVec<[u32; 4]> = v1.splice(splice_point6..splice_point6 + 1 as usize, val..val + 2).collect();
+    }
+
+    // This assertion should not be reachable since the previous assertion should panic.
+    sea::sassert!(false);
+}
 
 #[no_mangle]
 fn test_split_off() {

@@ -129,6 +129,7 @@ In order to use the project on Windows, a Docker container is used to run the pr
     From the root of the project, run:
 
     ```bash
+    docker pull seahorn/seahorn-llvm14:nightly
     docker build -t c-rust -f docker/c-rust.Dockerfile .
     ```
 

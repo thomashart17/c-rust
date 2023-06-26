@@ -1,22 +1,22 @@
 use core::panic::PanicInfo;
 use core::intrinsics;
-use crate::bindings::*;
+// use crate::bindings::*;
 
-macro_rules! sea_printf {
-    ($message:expr $(, $args:expr)*) => {{
-        use crate::bindings::sea_printf;
-        use core::ffi::c_char;
-        unsafe { sea_printf($message.as_ptr() as *const c_char, $($args),*); }
-    }}
-}
+// macro_rules! sea_printf {
+//     ($message:expr $(, $args:expr)*) => {{
+//         use crate::bindings::sea_printf;
+//         use core::ffi::c_char;
+//         unsafe { sea_printf($message.as_ptr() as *const c_char, $($args),*); }
+//     }}
+// }
 
 #[cfg(feature = "panic_error")]
 use crate::seahorn::verifier_error;
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    #[cfg(feature = "panic_error")]
-    sea_printf!("PANIC ERROR***");
+    // #[cfg(feature = "panic_error")]
+    // sea_printf!("PANIC ERROR***");
 
     #[cfg(feature = "panic_error")]
     verifier_error();

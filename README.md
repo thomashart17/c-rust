@@ -95,6 +95,56 @@ As a prerequisite, follow [this guide](https://github.com/seahorn/seahorn/tree/m
     cmake --build .
     ```
 
+## Running on Windows with Docker
+
+In order to use the project on Windows, a Docker container is used to run the project. To set this up, do the following:
+
+1. Install and setup the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+2. Install [Docker Desktop for Windows](https://docs.docker.com/docker-for-windows/install/)
+3. Install the [Dev - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for VS Code
+4. From a command prompt, enter WSL using:
+
+    ```cmd
+    wsl
+    ```
+
+5. Configure git inside of WSL
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "Your Email"
+    ```
+
+6. Setup an SSH key for GitHub by following [this guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account?platform=linux)
+
+7. Clone the project into your home directory
+
+    ```bash
+    cd ~
+    git clone git@github.com:thomashart17/c-rust.git
+    ```
+
+8. Build the Docker container
+
+    From the root of the project, run:
+
+    ```bash
+    docker pull seahorn/seahorn-llvm14:nightly
+    docker build -t c-rust -f docker/c-rust.Dockerfile .
+    ```
+
+9. Run the Docker container
+
+    ```bash
+    docker run -it c-rust
+    ```
+
+    After completing this step, you will be able to stop and start the docker container from the Docker Desktop application. Running this again will create a new container that will not contain any of the changes made in the previous container.
+
+10. Open the project in VS Code
+
+    Once the container is running, open VS Code and select the `Dev Containers: Attach to Running Container...` command from the command palette. Select the container that was just created and wait for the project to open.
+
 ## Custom Print Macros
 
 To avoid increased runtime for jobs using print macros, custom print macros can overwrite the standard print macros and remove their functionality. These macros are defined in `sea` and can be imported as follows:

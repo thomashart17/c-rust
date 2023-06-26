@@ -13,8 +13,8 @@ path = "lib.rs"
 
 [dependencies.sea]
 path = "../../sea-lib"
-default-features = false
-features = ["panic_error"]
+default-features = true
+# features = ["panic_error"]
 
 [features]
 default = []  # Specify other default features here, if any

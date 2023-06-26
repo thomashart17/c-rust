@@ -16,20 +16,21 @@ use core::ptr;
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    // test_new();
-    // sea::sassert!(false);
-    // test_grow();
-    // test_pop();
-    // test_push();
-    // test_drop();
-    // test_deref();
-    // test_deref_mut();
-    // test_insert();
-    // test_remove();
+    test_new();
+    test_grow();
+    test_pop();
+    test_push();
+    test_drop();
+    test_deref();
+    test_deref_mut();
+    test_insert();
+    test_remove();
 
     test_into_iter();
-    // test_into_iter_size();
-    // test_into_iter_drop();
+    test_into_iter_size();
+    test_into_iter_drop();
+
+    // sea::sassert!(false);
 }
 
 #[no_mangle]

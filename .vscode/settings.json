@@ -10,6 +10,10 @@
         "./src/sea-lib/Cargo.toml",
         "./src/sea-lib/Cargo.toml",
         "./Cargo.toml",
-        "./Cargo.toml"
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./Cargo.toml",
+        "./src/sea-lib/Cargo.toml",
+        "./src/sea-lib/Cargo.toml"
     ]
 }

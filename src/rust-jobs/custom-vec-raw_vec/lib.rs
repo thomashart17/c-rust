@@ -32,7 +32,6 @@ pub extern "C" fn entrypt() {
     test_into_iter_size();
     test_into_iter_drop();
 
-
     // sea::sassert!(false);
 }
 

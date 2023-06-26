@@ -5,7 +5,6 @@ use sea;
 #[no_mangle]
 pub extern "C" fn entrypt() {
     test();
-    // panic!();
     // test();qq
 }
 
@@ -22,5 +21,4 @@ fn test() {
     }
     sea::sassert!(v == original + 2);
     panic!();
-    // sea::sassert!(false);
 }

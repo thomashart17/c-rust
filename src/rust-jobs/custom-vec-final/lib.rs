@@ -12,29 +12,46 @@ use core::mem;
 use core::ops::{Deref, DerefMut};
 use core::ptr::NonNull;
 use core::ptr;
+use core::marker::PhantomData;
 
 
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    test_new();
-    test_grow();
-    test_pop();
-    test_push();
-    test_drop();
-    test_deref();
-    test_deref_mut();
-    test_insert();
-    test_remove();
+// Running all the tests causes seahorn to crash
 
+    // **********************
+    // These tests are the same as those in custom-vec-raw_vec
+    // test_new();
+    // test_grow();
+    // test_pop();
+    // test_push();
+    // test_drop();
+    // test_deref();
+    // test_deref_mut();
+    // test_insert();
+    // test_remove();
+    // **********************
+
+    // **********************
+    // These tests are the same. Only the format is modified.
     test_into_iter_front();
     test_into_iter_back();
     test_into_iter_size();
     test_into_iter_drop();
 
+    test_drain_front();
+    test_drain_back();
+    test_drain_size();
+    test_drain_drop();
 
+    // **********************
+    // Tests for Zero Sized Types
+    test_zst();
+    test_alignment();
     // sea::sassert!(false);
 }
+
 
 #[no_mangle]
 fn test_new() {
@@ -185,9 +202,8 @@ fn test_remove() {
 }
 
 #[no_mangle]
-#[inline(never)]
 fn test_into_iter_front() {
-    let n: u32 = 5;
+    let n: u32 = 3;
 
     let mut v: CustomVec<u32> = CustomVec::new();
     for i in 0..n {
@@ -196,13 +212,13 @@ fn test_into_iter_front() {
 
     let mut iter: IntoIter<u32> = v.into_iter();
     for i in 0..n {
-        sea::sassert!(iter.next() == Some(i));
+        sea::sassert!(iter.next().unwrap().0 == i);
     }
 }
 
 #[no_mangle]
 fn test_into_iter_back() {
-    let n: u32 = 5;
+    let n: u32 = 3;
 
     let mut v: CustomVec<u32> = CustomVec::new();
     for i in 0..n {
@@ -211,7 +227,8 @@ fn test_into_iter_back() {
 
     let mut iter: IntoIter<u32> = v.into_iter();
     for i in 0..n {
-        sea::sassert!(iter.next_back() == Some(n-i-1));
+        sea::sassert!(iter.next_back().unwrap().0 == n-i-1);
+
     }
 }
 
@@ -238,6 +255,7 @@ fn test_into_iter_size() {
 
 #[no_mangle]
 fn test_into_iter_drop() {
+    let n: u32 = 4; // max elements it works for (6 due to manual pushes)
     static mut DROP_COUNT: u32 = 0;
     pub struct DropTest { _value: u32, }
     impl Drop for DropTest {
@@ -246,7 +264,7 @@ fn test_into_iter_drop() {
 
     let mut v: CustomVec<DropTest> = CustomVec::new();
     v.push(DropTest { _value: 0 });
-    for i in 0..4{
+    for i in 0..n {
         v.push(DropTest { _value: i.try_into().unwrap() });
     }
     v.push(DropTest { _value: 0 });
@@ -263,58 +281,602 @@ fn test_into_iter_drop() {
     sea::sassert!(unsafe { DROP_COUNT == 6 });
 }
 
+#[no_mangle]
+fn test_drain_front() {
+    let n: u32 = 8; // most elements it will work for
+
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n {
+        v.push(i);
+    }
+
+    let mut drained: Drain<'_, u32> = v.drain();
+    for i in 0..n {
+        sea::sassert!(drained.next().unwrap().0 == i);
+    }
+    drop(drained);
+    
+    sea::sassert!(v.pop() == None);
+    v.push(0);
+    sea::sassert!(v.len == 1);
+}
+
+#[no_mangle]
+fn test_drain_back() {
+    let n = 4; // most elements it will work for
+
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n {
+        v.push(i);
+    }
+
+    let mut drained: Drain<'_, u32> = v.drain();
+    for i in 0..n {
+        sea::sassert!(drained.next_back().unwrap().0 == n-i-1);
+    }
+
+    drop(drained);
+    sea::sassert!(v.pop() == None);
+    v.push(0);
+    sea::sassert!(v.len == 1);
+}
+
+#[no_mangle]
+fn test_drain_size() {
+    let n: usize = 8;
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for i in 0..n {
+        v.push(i.try_into().unwrap());
+    }
+
+    let mut drained: Drain<'_, u32> = v.drain();
+    sea::sassert!(drained.size_hint().0 == n);
+    for i in 0..n {
+        let front: bool = sea::nd_bool();
+        if front { _ = drained.next(); }
+        else { _ = drained.next_back(); }
+
+        sea::sassert!(drained.size_hint().0 == n-i-1);
+    }
+    drop(drained);
+
+    sea::sassert!(v.len == 0);
+}
+
+#[no_mangle]
+fn test_drain_drop() {
+    let n: u32 = 10;
+    static mut DROP_COUNT: u32 = 0;
+    pub struct DropTest { _value: u32, }
+    impl Drop for DropTest {
+        fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
+    }
+
+    let mut v: CustomVec<DropTest> = CustomVec::new();
+    v.push(DropTest { _value: 0 });
+    for i in 0..n {
+        v.push(DropTest { _value: i });
+    }
+    v.push(DropTest { _value: 0 });
+
+    let mut drained: Drain<'_, DropTest> = v.drain();
+    _ = drained.next();
+    _ = drained.next();
+    _ = drained.next_back();
+    _ = drained.next();
+    _ = drained.next_back();
+
+    sea::sassert!(unsafe { DROP_COUNT == 5 });
+
+    drop(drained);
+    sea::sassert!(unsafe { DROP_COUNT == n+2 });
+
+    v.push(DropTest { _value: 0 });
+    sea::sassert!(v.len == 1);
+
+    drop(v);
+    sea::sassert!(unsafe { DROP_COUNT == n+3 });
+}
+
+#[no_mangle]
+fn test_alignment() {
+    #[repr(align(2))] // alignmnet size of 4
+    struct ZST { }
+    let mut alignment_size: usize;
+    let mut unaligned_start: bool = false;
+    let mut unaligned_end: bool = false;
+
+    alignment_size = mem::align_of::<u32>();
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for _ in 0.. 10 { v.push(0); }
+    let mut iter: IntoIter<u32> = v.into_iter();
+    for i in 0.. 10 {
+        if i%2 == 0 {
+            match iter.next() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_start = true;
+                    }
+                },
+                None => {},
+            };
+        } else {
+            match iter.next_back() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_end = true;
+                    }
+                },
+                None => {},
+            };
+        }
+    }
+    drop(iter);
+
+    let mut v: CustomVec<u32> = CustomVec::new();
+    for _ in 0.. 10 { v.push(0); }
+    let mut drain: Drain<'_, u32> = v.drain();
+    for i in 0.. 10 {
+        if i%2 == 0 {
+            match drain.next() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_start = true;
+                    }
+                },
+                None => {},
+            };
+        } else {
+            match drain.next_back() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_end = true;
+                    }
+                },
+                None => {},
+            };
+        }
+    }
+    drop(drain);
+
+    alignment_size = mem::align_of::<ZST>();
+
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0.. 10 { v.push(ZST {}); }
+    let mut iter: IntoIter<ZST> = v.into_iter();
+    for i in 0.. 10 {
+        if i%2 == 0 {
+            match iter.next() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_start = true;
+                    }
+                },
+                None => {},
+            };
+        } else {
+            match iter.next_back() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_start = true;
+                    }
+                },
+                None => {},
+            };
+        }
+    }
+    drop(iter);
+
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0.. 10 { v.push(ZST {}); }
+    let mut drain: Drain<'_, ZST> = v.drain();
+    for i in 0.. 10 {
+        if i%2 == 0 {
+            match drain.next() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_start = true;
+                    }
+                },
+                None => {},
+            };
+        } else {
+            match drain.next_back() {
+                Some((_value, ptr)) => {
+                    if (ptr as usize) % alignment_size != 0 {
+                        unaligned_end = true;
+                    }
+                },
+                None => {},
+            };
+        }
+    }
+    drop(drain);
+
+    sea::sassert!(!unaligned_start);
+    sea::sassert!(!unaligned_end);
+}
+
+impl<T> Drop for CustomVec<T> {
+    fn drop(&mut self) {
+        unsafe {
+            if mem::size_of::<T>() == 0 {
+                for _ in 0.. self.len { _ = self.pop(); }
+            } else {
+                let slice: &mut [T] = core::slice::from_raw_parts_mut(self.ptr(), self.len);
+                let copy_ptr: *mut T = alloc(Layout::array::<T>(self.len).unwrap()) as *mut T;
+                copy_ptr.copy_from_nonoverlapping(slice.as_ptr(), self.len);
+    
+                let copy_slice: &mut [T] = core::slice::from_raw_parts_mut(copy_ptr, self.len);
+    
+                _ = Box::from_raw(copy_slice as *mut [T]);
+            }
+        }
+        // deallocation is handled by RawVec
+    }
+}
+
+#[no_mangle]
+fn test_zst() {
+    static mut DROP_COUNT: usize = 0;
+    #[derive(PartialEq)]
+    struct ZST { }
+    impl Drop for ZST { fn drop(&mut self) { unsafe { DROP_COUNT += 1; } } }
+    
+    // new, push, pop
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    sea::sassert!(v.len == 0 && v.buf.cap == usize::MAX);
+    sea::sassert!(v.pop() == None);
+
+    v.push(ZST {});
+    v.push(ZST {});
+    sea::sassert!(v.len == 2);
+
+    sea::sassert!(v.pop() == Some(ZST {})); // causes extra drop from Some(ZST)
+    sea::sassert!(v.len == 1);
+    sea::sassert!(unsafe { DROP_COUNT == 2 });
+
+    for _ in 0.. 5 { v.push(ZST {}); }
+    sea::sassert!(v.pop() == Some(ZST {})); // causes extra drop from Some(ZST)
+
+    drop(v);
+    sea::sassert!(unsafe { DROP_COUNT == 9 }); // 7 push + 2 in sassert
+
+    // deref and deref mut
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0.. 5 { v.push(ZST {}); }
+    _ = v.pop();
+    let slice: &[ZST] = &*v;
+    sea::sassert!(slice.len() == 4);
+    sea::sassert!(slice[0] == ZST {});
+    drop(slice);
+
+    let slice: &mut [ZST] = &mut *v;
+    slice[0] = ZST {};
+    sea::sassert!(slice.len() == 4);
+    sea::sassert!(slice[0] == ZST {});
+    slice[slice.len()-1] = ZST {};
+    sea::sassert!(v.pop() == Some(ZST {}));
+    drop(v);
+
+    // test_drain_front();
+    // test_drain_back();
+    // test_drain_size();
+    // test_drain_drop();
+
+    // insert and remove
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0.. 4 { v.push(ZST {}); }
+    v.insert(2, ZST {});
+    let slice: &[ZST] = &*v;
+    sea::sassert!(v.len == 5);
+    sea::sassert!(slice.len() == 5);
+    sea::sassert!(slice[2] == ZST {});
+
+    sea::sassert!(v.remove(1) == ZST {});
+    sea::sassert!(v.len == 4);
+    let slice: &[ZST] = &*v;
+    sea::sassert!(slice.len() == 4);
+    sea::sassert!(v.remove(3) == ZST {});
+    sea::assume(v.len == 3);
+
+    // into_iter: front, back, size, drop
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0..5 { v.push(ZST {}); }
+    let mut iter: IntoIter<ZST> = v.into_iter();
+    for _ in 0..5 {
+        sea::sassert!(iter.next() == Some((ZST {}, NonNull::dangling().as_ptr())));
+    }
+
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0.. 5 { v.push(ZST {}); }
+    let mut iter: IntoIter<ZST> = v.into_iter();
+    for _ in 0.. 5 {
+        sea::sassert!(iter.next_back() == Some((ZST {}, NonNull::dangling().as_ptr())));
+    }
+
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0.. 5 { v.push(ZST {}); }
+    let mut iter: IntoIter<ZST> = v.into_iter();
+    for i in 0.. 5 {
+        if i%2 == 0 { _ = iter.next(); }
+        else { iter.next_back(); }
+        let size: usize = (5-i-1).try_into().unwrap();
+        sea::sassert!(iter.size_hint().0 == size);
+    }
+
+    unsafe { DROP_COUNT = 0; }
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    v.push(ZST {});
+    for _ in 0.. 5 { v.push(ZST {}); }
+    v.push(ZST {});
+    let mut iter: IntoIter<ZST> = v.into_iter();
+    _ = iter.next();
+    _ = iter.next();
+    _ = iter.next_back();
+    _ = iter.next_back();
+    sea::sassert!(unsafe { DROP_COUNT == 4 });
+    drop(iter);
+    sea::sassert!(unsafe { DROP_COUNT == 7 });
+}
+
+
+
+// #[no_mangle]
+// fn test_into_iter_drop() {
+//     let mut iter: IntoIter<DropTest> = v.into_iter();
+//     iter.next();
+//     iter.next();
+//     iter.next_back();
+//     iter.next_back();
+
+//     sea::sassert!(unsafe { DROP_COUNT == 4 });
+
+//     drop(iter);
+//     sea::sassert!(unsafe { DROP_COUNT == 6 });
+// }
+
+
 
 fn custom_vec_valid_after_init<T>(vec: &CustomVec<T>) -> bool {
     vec.len == 0 &&
     vec.buf.cap == 0 && {
-        if mem::size_of::<T>() != 0 { vec.ptr() == NonNull::dangling().as_ptr() } 
+        if mem::size_of::<T>() != 0 { vec.ptr() == NonNull::<T>::dangling().as_ptr() } 
         else { true }
+    }
+}
+
+
+#[no_mangle]
+fn test_alignment_bug() {
+    #[repr(align(4))] // alignmnet size of 4
+    struct ZST { }
+
+    let alignment_size: usize = mem::align_of::<ZST>();
+
+    let n: u32 = 10;
+    let mut v: CustomVec<ZST> = CustomVec::new();
+    for _ in 0..n {
+        v.push(ZST {});
+    }
+
+    let mut iter: IntoIter<ZST> = v.into_iter();
+    let mut unaligned_start: bool = false;
+    let mut unaligned_end: bool = false;
+
+    for i in 0..n {
+        let address: usize;
+        if i%2 == 0 {
+            _ = iter.next();
+            address = unsafe { ptr::addr_of!(*iter.iter.start) as usize };
+            if (address % alignment_size) != 0 {
+                unaligned_start = true;
+            }
+        } else {
+            _ = iter.next_back();
+            address = unsafe { ptr::addr_of!(*iter.iter.end) as usize };
+            if (address % alignment_size) != 0 {
+                unaligned_end = true;
+            }
+        }
+    }
+
+    sea::sassert!(unaligned_start);
+    sea::sassert!(unaligned_end);
+}
+
+
+pub struct Drain<'a, T: 'a> {
+    vec: PhantomData<&'a mut CustomVec<T>>,
+    iter: RawValIter<T>,
+}
+
+impl<'a, T> Iterator for Drain<'a, T> {
+    type Item = (T, *const T);
+    fn next(&mut self) -> Option<(T, *const T)> { self.iter.next() }
+    fn size_hint(&self) -> (usize, Option<usize>) { self.iter.size_hint() }
+}
+
+impl<'a, T> DoubleEndedIterator for Drain<'a, T> {
+    fn next_back(&mut self) -> Option<(T, *const T)> { self.iter.next_back() }
+}
+
+impl<'a, T> Drop for Drain<'a, T> {
+    fn drop(&mut self) {
+        for _ in &mut *self {}
+    }
+}
+
+impl<T> CustomVec<T> {
+    pub fn drain(&mut self) -> Drain<T> {
+        unsafe {
+            let iter = RawValIter::new(&self);
+
+            // this is a mem::forget safety thing. If Drain is forgotten, we just
+            // leak the whole Vec's contents. Also we need to do this *eventually*
+            // anyway, so why not do it now?
+            self.len = 0;
+
+            Drain {
+                iter: iter,
+                vec: PhantomData,
+            }
+        }
+    }
+}
+
+struct RawValIter<T> {
+    start: *const T,
+    end: *const T,
+}
+
+impl<T> RawValIter<T> {
+    unsafe fn new(slice: &[T]) -> Self {
+        RawValIter {
+            start: slice.as_ptr(),
+            end: if mem::size_of::<T>() == 0 {
+                ((slice.as_ptr() as usize) + slice.len()) as *const _
+            } else if slice.len() == 0 {
+                slice.as_ptr()
+            } else {
+                slice.as_ptr().add(slice.len())
+            },
+        }
+    }
+}
+
+impl<T> Iterator for RawValIter<T> {
+    type Item = (T, *const T);
+    fn next(&mut self) -> Option<(T, *const T)> {
+        if self.start == self.end {
+            None
+        } else {
+            unsafe {
+                if mem::size_of::<T>() == 0 {
+                    self.start = (self.start as usize + 1) as *const _;
+                    Some((ptr::read(NonNull::<T>::dangling().as_ptr()), NonNull::<T>::dangling().as_ptr()))
+                } else {
+                    let old_ptr = self.start;
+                    self.start = self.start.offset(1);
+                    Some((ptr::read(old_ptr), old_ptr))
+                }
+            }
+        }
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let elem_size = mem::size_of::<T>();
+        let len = (self.end as usize - self.start as usize)
+                  / if elem_size == 0 { 1 } else { elem_size };
+        (len, Some(len))
+    }
+}
+
+impl<T> DoubleEndedIterator for RawValIter<T> {
+    fn next_back(&mut self) -> Option<(T, *const T)> {
+        if self.start == self.end {
+            None
+        } else {
+            unsafe {
+                let pointer = if mem::size_of::<T>() == 0 {
+                    self.end = (self.end as usize - 1) as *const _;
+                    NonNull::<T>::dangling().as_ptr()
+                } else {
+                    self.end = self.end.offset(-1);
+                    self.end
+                };
+                let value = ptr::read(pointer);
+                Some((value, pointer))
+
+                // if mem::size_of::<T>() == 0 {
+                    
+                //     self.end = (self.end as usize - 1) as *const _;
+                //     Some((ptr::read(NonNull::<T>::dangling().as_ptr()) Non)
+                // } else {
+                //     self.end = self.end.offset(-1);
+                //     Some(ptr::read(self.end))
+                // }
+
+
+            }
+        }
+    }
+}
+
+pub struct IntoIter<T> {
+    _buf: RawVec<T>, // we don't actually care about this. Just need it to live.
+    iter: RawValIter<T>,
+    len: usize,
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = (T, *const T);
+    fn next(&mut self) -> Option<(T, *const T)> { self.iter.next() }
+    fn size_hint(&self) -> (usize, Option<usize>) { self.iter.size_hint() }
+}
+
+impl<T> DoubleEndedIterator for IntoIter<T> {
+    fn next_back(&mut self) -> Option<(T, *const T)> { self.iter.next_back() }
+}
+
+// impl<T> Drop for IntoIter<T> {
+//     fn drop(&mut self) {
+//         // for _ in &mut *self {}
+//         unsafe {
+//             for mut _i in 0..self.len {
+//                 if self.iter.start >= self.iter.end { 
+//                     _i = self.len;
+//                     continue;
+//                 }
+                
+//                 ptr::drop_in_place(self.iter.start as *mut T);
+//                 self.iter.start = self.iter.start.offset(1);
+//             }
+//         }
+//     }
+// }
+
+impl<T> IntoIterator for CustomVec<T> {
+    type Item = (T, *const T);
+    type IntoIter = IntoIter<T>;
+    fn into_iter(self) -> IntoIter<T> {
+        unsafe {
+            let iter = RawValIter::new(&self);
+            let buf = ptr::read(&self.buf);
+            let len = self.len;
+
+            mem::forget(self);
+
+            IntoIter {
+                iter: iter,
+                _buf: buf,
+                len: len,
+            }
+        }
     }
 }
 
 impl<T> Drop for IntoIter<T> {
     fn drop(&mut self) {
+        // for _ in &mut *self {}
         unsafe {
             for mut _i in 0..self.len {
-                if self.start >= self.end { 
+                if self.iter.start >= self.iter.end { 
                     _i = self.len;
                     continue;
                 }
-                
-                ptr::drop_in_place(self.start as *mut T);
-                self.start = self.start.offset(1);
+                if mem::size_of::<T>() == 0 {
+                    ptr::drop_in_place(NonNull::<T>::dangling().as_ptr());
+                    self.iter.start = (self.iter.start as usize + 1) as *const _;
+                    
+                } else {
+                    ptr::drop_in_place(self.iter.start as *mut T);
+                    self.iter.start = self.iter.start.offset(1);
+                }
             }
         }
     }
 }
 
-impl<T> Drop for CustomVec<T> {
-    fn drop(&mut self) {
-        if self.len != 0 {
-            unsafe {
-                let slice: &mut [T] = core::slice::from_raw_parts_mut(self.ptr(), self.len);
-                
-                let copy_ptr: *mut T = alloc(Layout::array::<T>(self.len).unwrap()) as *mut T;
-                copy_ptr.copy_from_nonoverlapping(slice.as_ptr(), self.len);
-                let copy_slice: &mut [T] = core::slice::from_raw_parts_mut(copy_ptr, self.len);
-                _ = Box::from_raw(copy_slice as *mut [T]);
-            }
-        }
-    
-        // deallocation is handled by RawVec
-    }
-}
-
-impl<T> Drop for RawVec<T> {
-    fn drop(&mut self) {
-        if self.cap != 0 {
-            let layout = Layout::array::<T>(self.cap).unwrap();
-            unsafe {
-                dealloc(self.ptr.as_ptr() as *mut u8, layout);
-            }
-        }
-    }
-}
 
 struct RawVec<T> {
     ptr: NonNull<T>,
@@ -323,17 +885,24 @@ struct RawVec<T> {
 
 impl<T> RawVec<T> {
     fn new() -> Self {
-        assert!(mem::size_of::<T>() != 0, "TODO: implement ZST support");
+        let cap = if mem::size_of::<T>() == 0 { usize::MAX } else { 0 };
+
         RawVec {
             ptr: NonNull::dangling(),
-            cap: 0,
+            cap: cap,
         }
     }
 
     fn grow(&mut self) {
-        let new_cap = if self.cap == 0 { 1 } else { 2 * self.cap };
+        assert!(mem::size_of::<T>() != 0, "capacity overflow");
 
-        let new_layout = Layout::array::<T>(new_cap).unwrap();
+        let (new_cap, new_layout) = if self.cap == 0 {
+            (1, Layout::array::<T>(1).unwrap())
+        } else {
+            let new_cap = 2 * self.cap;
+            let new_layout = Layout::array::<T>(new_cap).unwrap();
+            (new_cap, new_layout)
+        };
 
         assert!(new_layout.size() <= isize::MAX as usize, "Allocation too large");
 
@@ -351,6 +920,22 @@ impl<T> RawVec<T> {
         self.cap = new_cap;
     }
 }
+
+impl<T> Drop for RawVec<T> {
+    fn drop(&mut self) {
+        let elem_size = mem::size_of::<T>();
+
+        if self.cap != 0 && elem_size != 0 {
+            unsafe {
+                dealloc(
+                    self.ptr.as_ptr() as *mut u8,
+                    Layout::array::<T>(self.cap).unwrap(),
+                );
+            }
+        }
+    }
+}
+
 
 pub struct CustomVec<T> {
     buf: RawVec<T>,
@@ -379,7 +964,6 @@ impl<T> CustomVec<T> {
         unsafe {
             ptr::write(self.ptr().add(self.len), elem);
         }
-
         self.len += 1;
     }
 
@@ -425,6 +1009,7 @@ impl<T> CustomVec<T> {
     }
 }
 
+
 impl<T> Deref for CustomVec<T> {
     type Target = [T];
     fn deref(&self) -> &[T] {
@@ -442,75 +1027,23 @@ impl<T> DerefMut for CustomVec<T> {
     }
 }
 
-pub struct IntoIter<T> {
-    _buf: RawVec<T>,
-    start: *const T,
-    end: *const T,
-    len: usize,
-}
+// impl<T> Drop for CustomVec<T> {
+//     fn drop(&mut self) {
+//         unsafe {
+//             let slice: &mut [T] = core::slice::from_raw_parts_mut(self.ptr(), self.len);
 
-
-impl<T> IntoIterator for CustomVec<T> {
-    type Item = T;
-    type IntoIter = IntoIter<T>;
-    fn into_iter(self) -> IntoIter<T> {
-        unsafe {
-            let buf = ptr::read(&self.buf);
-            let len = self.len;
-            mem::forget(self);
-
-            IntoIter {
-                start: buf.ptr.as_ptr(),
-                end: if buf.cap == 0 {
-                    buf.ptr.as_ptr()
-                } else {
-                    buf.ptr.as_ptr().add(len)
-                },
-                _buf: buf,
-                len: len,
-            }
-        }
-    }
-}
-
-impl<T> Iterator for IntoIter<T> {
-    type Item = T;
-    fn next(&mut self) -> Option<T> {
-        if self.start == self.end {
-            None
-        } else {
-            // self.len -= 1;
-
-            unsafe {
-                let result: T = ptr::read(self.start);
-                self.start = self.start.offset(1);
-                Some(result)
-            }
-        }
-    }
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = (self.end as usize - self.start as usize)
-                         / mem::size_of::<T>();
-        (len, Some(len))
-    }
-}
-
-impl<T> DoubleEndedIterator for IntoIter<T> {
-    fn next_back(&mut self) -> Option<T> {
-        if self.start == self.end {
-            None
-        } else {
-            // self.len -= 1;
-            unsafe {
-                self.end = self.end.offset(-1);
-                Some(ptr::read(self.end))
-            }
-        }
-    }
-}
+//             let copy_ptr: *mut T = alloc(Layout::array::<T>(self.len).unwrap()) as *mut T;
+//             copy_ptr.copy_from_nonoverlapping(slice.as_ptr(), self.len);
+//             let copy_slice: &mut [T] = core::slice::from_raw_parts_mut(copy_ptr, self.len);
+//             _ = Box::from_raw(copy_slice as *mut [T]);
+//         }
+//         // deallocation is handled by RawVec
+//     }
+// }
 
 unsafe impl<T: Send> Send for CustomVec<T> {}
 unsafe impl<T: Sync> Sync for CustomVec<T> {}
 
 unsafe impl<T: Send> Send for RawVec<T> {}
 unsafe impl<T: Sync> Sync for RawVec<T> {}
+

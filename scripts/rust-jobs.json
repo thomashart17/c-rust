@@ -5,6 +5,7 @@
         "custom-print-no-std",
         "custom-print-writer",
         "custom-vec",
+        "custom-vec-zst-alignment-issue",
         "custom-vec-drain",
         "custom-vec-final",
         "custom-vec-raw_vec",

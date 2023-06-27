@@ -71,30 +71,29 @@ pub extern "C" fn entrypt() {
 
 #[no_mangle]
 fn test_append() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
+    const CAP: usize = 1;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
+    sea::assume(len <= CAP);
 
     for _i in 0..len {
         v.push(sea::nd_u32());
     }
 
-    let mut v2: SmallVec<[u32; 8]> = SmallVec::new();
+    let mut v2: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len2: usize = sea::nd_usize();
-    sea::assume(len2 <= 8);
+    sea::assume(len2 <= CAP);
 
     for _i in 0..len2 {
         v2.push(sea::nd_u32());
     }
 
-    if len + len2 <= 8 {
-        v.append(&mut v2);
+    v.append(&mut v2);
 
-        sea::sassert!(v.len() == len + len2);
-        sea::sassert!(v.capacity() == 8);
-    }
+    sea::sassert!(v.len() == len + len2);
+    sea::sassert!(v.capacity() == CAP);
 }
 
 #[no_mangle]
@@ -513,7 +512,7 @@ fn test_pop() {
 
 #[no_mangle]
 fn test_push() {
-    const CAP: usize = 8;
+    const CAP: usize = 1;
     let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
@@ -530,10 +529,9 @@ fn test_push() {
     sea::sea_printf!("len", len);
     if len == CAP {
         v.push(sea::nd_u32());
-        // TODO: Seahorn doesn't reach this point.
-        sea::sassert!(false);
-        sea::sassert!(v.len() == 9);
-        sea::sassert!(v.capacity() == 9);
+        // TODO: This point is only reached when CAP = 1.
+        sea::sassert!(v.len() == CAP + 1);
+        sea::sassert!(v.capacity() > CAP);
     }
 }
 

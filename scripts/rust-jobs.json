@@ -29,6 +29,7 @@
         "smallvec",
         "string-parse",
         "tinyvec-arrayvec",
+        "tinyvec-capacity-error",
         "vec",
         "vec-filter",
         "vec-sort-reverse"

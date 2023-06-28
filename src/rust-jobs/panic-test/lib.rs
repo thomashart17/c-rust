@@ -18,9 +18,8 @@ fn test() {
         *n = *n + 1;
         *n = *n + 1;
     }
-
-    // v += 2;
     sea::sassert!(v == original + 2);
 
+    // panic!();
     // core::panicking::panic("explicit panic");
 }

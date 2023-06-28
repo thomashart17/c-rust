@@ -1,3 +1,11 @@
+/*
+    To use specify CUSTOM_PANIC_NO_STD as a variable arg in
+    the crate's cmake. For example:
+    c_rust_llvm(panic-test panic-test.c ... CUSTOM_PANIC_NO_STD ...)
+    To specify behaviour pass in features and add functionality
+*/
+
+
 use core::panic::PanicInfo;
 use core::intrinsics;
 

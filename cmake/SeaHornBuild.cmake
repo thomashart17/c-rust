@@ -13,9 +13,22 @@ function(c_rust_llvm TARGET SRC_FILES)
 
 
     # build std library; require panic to abort without printing anything
-    corrosion_set_cargo_flags(${RUST_LIB_TARGET}	
-				 "-Zbuild-std=panic_abort,std" 
-				 "-Zbuild-std-features=panic_immediate_abort")
+    # when using #![no_std] use custom panic as defined in error_handle.rs
+    file(READ "lib.rs" LIB_RS_CONTENTS)
+    string(FIND "${LIB_RS_CONTENTS}" "#![no_std]" NO_STD)
+    if (NOT ${NO_STD} EQUAL -1)         # #![no_std]
+        corrosion_set_cargo_flags(${RUST_LIB_TARGET}
+            "-Zbuild-std=panic_abort,std"
+            "-Zbuild-std-features=default"
+        )
+    else()                              # std
+        corrosion_set_cargo_flags(${RUST_LIB_TARGET}
+            "-Zbuild-std=panic_abort,std"
+            "-Zbuild-std-features=panic_immediate_abort"
+        )
+    endif()
+
+
     # generate Rust to C bindings
     add_custom_command(
 		    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/inc/lib.h

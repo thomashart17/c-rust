@@ -380,7 +380,7 @@ fn test_drain_drop() {
 
 #[no_mangle]
 fn test_alignment() {
-    #[repr(align(2))] // alignmnet size of 4
+    #[repr(align(2))]
     struct ZST { }
 
     let mut v: CustomVec<u32> = CustomVec::new();

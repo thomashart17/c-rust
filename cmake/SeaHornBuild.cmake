@@ -25,8 +25,12 @@ function(c_rust_llvm TARGET SRC_FILES)
           "-Zbuild-std-features=panic_immediate_abort"
       )
     endif()
+    # corrosion_set_cargo_flags(${RUST_LIB_TARGET}
+    #     "-Zbuild-std=panic_abort,std"
+    #     "-Zbuild-std-features=panic_immediate_abort"
+    # )
 
-    
+
 
     # generate Rust to C bindings
     add_custom_command(

@@ -1,8 +1,10 @@
 #![no_std]
 use sea;
 
+
 #[no_mangle]
 pub extern "C" fn entrypt() {
+
     let mut v: i32  = sea::nd_i32();
     sea::assume(v > 0);
     let original: i32 = v;

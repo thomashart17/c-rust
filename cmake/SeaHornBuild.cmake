@@ -111,6 +111,14 @@ function(sea_add_sat_test TARGET)
   add_test(NAME "${TARGET}_sat_test" COMMAND ${VERIFY_CMD} ${VERIFY_FLAGS} --expect=sat ${BC})
 endfunction()
 
+function(sea_disable_unsat_test TARGET)
+  set_tests_properties("${TARGET}_unsat_test" PROPERTIES DISABLED TRUE)
+endfunction()
+
+function(sea_disable_sat_test TARGET)
+  set_tests_properties("${TARGET}_sat_test" PROPERTIES DISABLED TRUE)
+endfunction()
+
 function(sea_discover_tests TARGET)
   sea_get_file_name(BC ${TARGET}.ir)
   cmake_path(SET bcpath "${BC}")

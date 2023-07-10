@@ -5,7 +5,6 @@ use sea;
 
 extern crate alloc;
 use alloc::alloc::{Layout, alloc, dealloc, realloc, handle_alloc_error};
-use alloc::boxed::Box;
 
 use core::mem;
 // use core::mem::ManuallyDrop;
@@ -25,7 +24,7 @@ pub extern "C" fn entrypt() {
     // test_new();
     // test_grow();
     // test_pop();
-    // test_push();
+    test_push();
     // test_drop();
     // test_deref();
     // test_deref_mut();
@@ -35,75 +34,75 @@ pub extern "C" fn entrypt() {
 
     // **********************
     // These tests are the same. Only the format is modified.
-    test_into_iter_front();
-    test_into_iter_back();
-    test_into_iter_size();
-    test_into_iter_drop();
+    // test_into_iter_front();
+    // test_into_iter_back();
+    // test_into_iter_size();
+    // test_into_iter_drop();
 
-    test_drain_front();
-    test_drain_back();
-    test_drain_size();
-    test_drain_drop();
+    // test_drain_front();
+    // test_drain_back();
+    // test_drain_size();
+    // test_drain_drop();
 
     // **********************
     // Tests for Zero Sized Types
-    test_zst();
-    test_alignment();
-    // sea::sassert!(false);
+    // test_zst();
+    // test_alignment();
+    sea::sassert!(false);
 }
 
 
-#[no_mangle]
-fn test_new() {
-    let v: CustomVec<i32> = CustomVec::new();
-    sea::sassert!(custom_vec_valid_after_init(&v));
-    sea::sassert!(v.len == 0);
-    sea::sassert!(v.cap() == 0);
-    sea::sassert!(!v.ptr().is_null());
-}
+// #[no_mangle]
+// fn test_new() {
+//     let v: CustomVec<i32> = CustomVec::new();
+//     sea::sassert!(custom_vec_valid_after_init(&v));
+//     sea::sassert!(v.len == 0);
+//     sea::sassert!(v.cap() == 0);
+//     sea::sassert!(!v.ptr().is_null());
+// }
 
-#[no_mangle]
-fn test_grow() {
-    let original = sea::nd_usize();
+// #[no_mangle]
+// fn test_grow() {
+//     let original = sea::nd_usize();
 
-    let mut v: CustomVec<i32> = CustomVec::new();
-    sea::sassert!(custom_vec_valid_after_init(&v));
+//     let mut v: CustomVec<i32> = CustomVec::new();
+//     sea::sassert!(custom_vec_valid_after_init(&v));
 
-    v.len = original;
-    v.buf.cap = original;
+//     v.len = original;
+//     v.buf.cap = original;
 
-    v.buf.grow();
+//     v.buf.grow();
 
-    if original == 0 {
-        sea::sassert!(v.cap() == 1)
-    } else {
-        sea::sassert!(v.cap() == 2 * original);
-    }
-    sea::sassert!(v.len == original);
-}
+//     if original == 0 {
+//         sea::sassert!(v.cap() == 1)
+//     } else {
+//         sea::sassert!(v.cap() == 2 * original);
+//     }
+//     sea::sassert!(v.len == original);
+// }
 
-#[no_mangle]
-fn test_pop() {
-    let original = sea::nd_usize();
-    sea::assume(original > 0);
+// #[no_mangle]
+// fn test_pop() {
+//     let original = sea::nd_usize();
+//     sea::assume(original > 0);
 
-    let mut v: CustomVec<i32> = CustomVec::new();
-    sea::sassert!(custom_vec_valid_after_init(&v));
+//     let mut v: CustomVec<i32> = CustomVec::new();
+//     sea::sassert!(custom_vec_valid_after_init(&v));
 
-    v.len = original;
-    v.buf.cap = original;
+//     v.len = original;
+//     v.buf.cap = original;
 
-    v.buf.grow();
-    v.pop();
+//     v.buf.grow();
+//     v.pop();
 
-    sea::sassert!(v.len == original - 1);
-    sea::sassert!(v.cap() == original * 2);
-}
+//     sea::sassert!(v.len == original - 1);
+//     sea::sassert!(v.cap() == original * 2);
+// }
 
 #[no_mangle]
 fn test_push() {
     let original = sea::nd_usize();
-    sea::assume(original > 0);
+    sea::assume(original > 0 && original < 1000000);
 
     let mut v: CustomVec<i32> = CustomVec::new();
     sea::sassert!(custom_vec_valid_after_init(&v));
@@ -115,338 +114,357 @@ fn test_push() {
     v.push(0);   
     sea::sassert!(v.len == original + 1);
     sea::sassert!(v.cap() == original * 2);
+    sea::sea_printf!("End of Test Push");
     // sea::sassert!(false);
 }
 
-#[no_mangle]
-fn test_drop() {
-    pub struct DropTest { _value: i32, }
-    impl Drop for DropTest {
-        fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
-    }
-    static mut DROP_COUNT: usize = 0;
+// #[no_mangle]
+// fn test_drop() {
+//     pub struct DropTest { _value: i32, }
+//     impl Drop for DropTest {
+//         fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
+//     }
+//     static mut DROP_COUNT: usize = 0;
 
-    let original: usize = 5;
+//     let original: usize = 5;
 
-    let mut v: CustomVec<DropTest> = CustomVec::new();
-    for i in 0..original { v.push(DropTest { _value: i.try_into().unwrap() }); }
-    _ = v.pop();
-    _ = v.pop();
-    _ = v.pop();
+//     let mut v: CustomVec<DropTest> = CustomVec::new();
+//     for i in 0..original { v.push(DropTest { _value: i.try_into().unwrap() }); }
+//     _ = v.pop();
+//     _ = v.pop();
+//     _ = v.pop();
 
-    drop(v);
-    sea::sassert!(unsafe { DROP_COUNT == original });
-}
+//     drop(v);
+//     sea::sassert!(unsafe { DROP_COUNT == original });
+// }
 
-#[no_mangle]
-fn test_deref() {
-    let original: usize = sea::nd_usize();
-    let num_pops: usize = sea::nd_usize();
-    sea::assume(num_pops <= original);
+// #[no_mangle]
+// fn test_deref() {
+//     let original: usize = sea::nd_usize();
+//     let num_pops: usize = sea::nd_usize();
+//     sea::assume(num_pops <= original);
 
-    let mut v: CustomVec<i32> = CustomVec::new();
-    for i in 0..original { v.push(i.try_into().unwrap()); }
-    for _i in 0..num_pops { _ = v.pop(); }
-    v.push(1);
-    let slice: &[i32] = &*v;
-    sea::sassert!(slice.len() == original - num_pops + 1);
-    sea::sassert!(slice[slice.len()-1] == 1);
-}
+//     let mut v: CustomVec<i32> = CustomVec::new();
+//     for i in 0..original { v.push(i.try_into().unwrap()); }
+//     for _i in 0..num_pops { _ = v.pop(); }
+//     v.push(1);
+//     let slice: &[i32] = &*v;
+//     sea::sassert!(slice.len() == original - num_pops + 1);
+//     sea::sassert!(slice[slice.len()-1] == 1);
+// }
 
-#[no_mangle]
-fn test_deref_mut() {
-    let mut v: CustomVec<i32> = CustomVec::new();
-    v.push(0);
-    v.push(3);
-    v.push(5);
+// #[no_mangle]
+// fn test_deref_mut() {
+//     let mut v: CustomVec<i32> = CustomVec::new();
+//     v.push(0);
+//     v.push(3);
+//     v.push(5);
 
-    let slice: &mut [i32] = &mut *v;
-    let length: usize = slice.len();
-    slice[0] = 10;
-    slice[1] = 40;
-    slice.sort();
+//     let slice: &mut [i32] = &mut *v;
+//     let length: usize = slice.len();
+//     slice[0] = 10;
+//     slice[1] = 40;
+//     slice.sort();
 
-    sea::sassert!(length == 3);
-    sea::sassert!(v.pop() == Some(40));
-    sea::sassert!(v.pop() == Some(10));
-    sea::sassert!(v.pop() == Some(5));
-    sea::sassert!(v.len == 0);
-}
+//     sea::sassert!(length == 3);
+//     sea::sassert!(v.pop() == Some(40));
+//     sea::sassert!(v.pop() == Some(10));
+//     sea::sassert!(v.pop() == Some(5));
+//     sea::sassert!(v.len == 0);
+// }
 
-#[no_mangle]
-fn test_insert() {
-    let mut v: CustomVec<i32> = CustomVec::new();
-    let n: usize = sea::nd_usize();
-    let index: usize = sea::nd_usize();
-    sea::assume(index <= n);
+// #[no_mangle]
+// fn test_insert() {
+//     let mut v: CustomVec<i32> = CustomVec::new();
+//     let n: usize = sea::nd_usize();
+//     let index: usize = sea::nd_usize();
+//     sea::assume(index <= n);
 
-    for _i in 0..n { v.push(1); }
+//     for _i in 0..n { v.push(1); }
     
-    v.insert(index, -1);
-    let slice: &mut [i32] = &mut *v;
-    sea::sassert!(slice[index] == -1);
-}
+//     v.insert(index, -1);
+//     let slice: &mut [i32] = &mut *v;
+//     sea::sassert!(slice[index] == -1);
+// }
 
-#[no_mangle]
-fn test_remove() {
-    let mut v: CustomVec<i32> = CustomVec::new();
-    let n: usize = sea::nd_usize();
-    sea::assume(n < 10);
-    let index: usize = sea::nd_usize();
-    sea::assume(index <= n);
+// #[no_mangle]
+// fn test_remove() {
+//     let mut v: CustomVec<i32> = CustomVec::new();
+//     let n: usize = sea::nd_usize();
+//     sea::assume(n < 10);
+//     let index: usize = sea::nd_usize();
+//     sea::assume(index <= n);
 
-    for i in 0..n { v.push(i.try_into().unwrap()); }
+//     for i in 0..n { v.push(i.try_into().unwrap()); }
     
-    let res: i32 = v.remove(index);
-    sea::sassert!(res == index.try_into().unwrap());
-}
+//     let res: i32 = v.remove(index);
+//     sea::sassert!(res == index.try_into().unwrap());
+// }
 
-#[no_mangle]
-fn test_into_iter_front() {
-    let n: u32 = 3;
+// #[no_mangle]
+// fn test_into_iter_front() {
+//     let n: u32 = 3;
 
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n {
-        v.push(i);
-    } 
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for i in 0..n {
+//         v.push(i);
+//     } 
 
-    let mut iter: IntoIter<u32> = v.into_iter();
-    for i in 0..n {
-        sea::sassert!(iter.next().unwrap() == i);
-    }
-}
+//     let mut iter: IntoIter<u32> = v.into_iter();
+//     for i in 0..n {
+//         sea::sassert!(iter.next().unwrap() == i);
+//     }
+// }
 
-#[no_mangle]
-fn test_into_iter_back() {
-    let n: u32 = 3;
+// #[no_mangle]
+// fn test_into_iter_back() {
+//     let n: u32 = 3;
 
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n {
-        v.push(i);
-    } 
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for i in 0..n {
+//         v.push(i);
+//     } 
 
-    let mut iter: IntoIter<u32> = v.into_iter();
-    for i in 0..n {
-        sea::sassert!(iter.next_back().unwrap() == n-i-1);
+//     let mut iter: IntoIter<u32> = v.into_iter();
+//     for i in 0..n {
+//         sea::sassert!(iter.next_back().unwrap() == n-i-1);
 
-    }
-}
+//     }
+// }
 
-#[no_mangle]
-fn test_into_iter_size() {
-    let n = 10;
+// #[no_mangle]
+// fn test_into_iter_size() {
+//     let n = 10;
 
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n { v.push(i); }
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for i in 0..n { v.push(i); }
     
-    let mut iter: IntoIter<u32> = v.into_iter();
+//     let mut iter: IntoIter<u32> = v.into_iter();
 
-    for i in 0..n {
-        let front: bool = sea::nd_bool();
-        if front {
-            _ = iter.next();
-        } else {
-            _ = iter.next_back();
-        }
-        let size: usize = (n-i-1).try_into().unwrap();
-        sea::sassert!(iter.size_hint().0 == size);
-    }
-}
+//     for i in 0..n {
+//         let front: bool = sea::nd_bool();
+//         if front {
+//             _ = iter.next();
+//         } else {
+//             _ = iter.next_back();
+//         }
+//         let size: usize = (n-i-1).try_into().unwrap();
+//         sea::sassert!(iter.size_hint().0 == size);
+//     }
+// }
 
-#[no_mangle]
-fn test_into_iter_drop() {
-    let n: u32 = 4; // max elements it works for (6 due to manual pushes)
-    static mut DROP_COUNT: u32 = 0;
-    pub struct DropTest { _value: u32, }
-    impl Drop for DropTest {
-        fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
-    }
+// #[no_mangle]
+// fn test_into_iter_drop() {
+//     let n: u32 = 4; // max elements it works for (6 due to manual pushes)
+//     static mut DROP_COUNT: u32 = 0;
+//     pub struct DropTest { _value: u32, }
+//     impl Drop for DropTest {
+//         fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
+//     }
 
-    let mut v: CustomVec<DropTest> = CustomVec::new();
-    v.push(DropTest { _value: 0 });
-    for i in 0..n {
-        v.push(DropTest { _value: i.try_into().unwrap() });
-    }
-    v.push(DropTest { _value: 0 });
+//     let mut v: CustomVec<DropTest> = CustomVec::new();
+//     v.push(DropTest { _value: 0 });
+//     for i in 0..n {
+//         v.push(DropTest { _value: i.try_into().unwrap() });
+//     }
+//     v.push(DropTest { _value: 0 });
 
-    let mut iter: IntoIter<DropTest> = v.into_iter();
-    iter.next();
-    iter.next();
-    iter.next_back();
-    iter.next_back();
+//     let mut iter: IntoIter<DropTest> = v.into_iter();
+//     iter.next();
+//     iter.next();
+//     iter.next_back();
+//     iter.next_back();
 
-    sea::sassert!(unsafe { DROP_COUNT == 4 });
+//     sea::sassert!(unsafe { DROP_COUNT == 4 });
 
-    drop(iter);
-    sea::sassert!(unsafe { DROP_COUNT == 6 });
-}
+//     drop(iter);
+//     sea::sassert!(unsafe { DROP_COUNT == 6 });
+// }
 
-#[no_mangle]
-fn test_drain_front() {
-    let n: u32 = 8; // most elements it will work for
+// #[no_mangle]
+// fn test_drain_front() {
+//     let n: u32 = 8; // most elements it will work for
 
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n {
-        v.push(i);
-    }
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for i in 0..n {
+//         v.push(i);
+//     }
 
-    let mut drained: Drain<'_, u32> = v.drain();
-    for i in 0..n {
-        sea::sassert!(drained.next().unwrap() == i);
-    }
-    drop(drained);
+//     let mut drained: Drain<'_, u32> = v.drain();
+//     for i in 0..n {
+//         sea::sassert!(drained.next().unwrap() == i);
+//     }
+//     drop(drained);
     
-    sea::sassert!(v.pop() == None);
-    v.push(0);
-    sea::sassert!(v.len == 1);
-}
+//     sea::sassert!(v.pop() == None);
+//     v.push(0);
+//     sea::sassert!(v.len == 1);
+// }
 
-#[no_mangle]
-fn test_drain_back() {
-    let n = 4; // most elements it will work for
+// #[no_mangle]
+// fn test_drain_back() {
+//     let n = 4; // most elements it will work for
 
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n {
-        v.push(i);
-    }
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for i in 0..n {
+//         v.push(i);
+//     }
 
-    let mut drained: Drain<'_, u32> = v.drain();
-    for i in 0..n {
-        sea::sassert!(drained.next_back().unwrap() == n-i-1);
-    }
+//     let mut drained: Drain<'_, u32> = v.drain();
+//     for i in 0..n {
+//         sea::sassert!(drained.next_back().unwrap() == n-i-1);
+//     }
 
-    drop(drained);
-    sea::sassert!(v.pop() == None);
-    v.push(0);
-    sea::sassert!(v.len == 1);
-}
+//     drop(drained);
+//     sea::sassert!(v.pop() == None);
+//     v.push(0);
+//     sea::sassert!(v.len == 1);
+// }
 
-#[no_mangle]
-fn test_drain_size() {
-    let n: usize = 8;
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for i in 0..n {
-        v.push(i.try_into().unwrap());
-    }
+// #[no_mangle]
+// fn test_drain_size() {
+//     let n: usize = 8;
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for i in 0..n {
+//         v.push(i.try_into().unwrap());
+//     }
 
-    let mut drained: Drain<'_, u32> = v.drain();
-    sea::sassert!(drained.size_hint().0 == n);
-    for i in 0..n {
-        let front: bool = sea::nd_bool();
-        if front { _ = drained.next(); }
-        else { _ = drained.next_back(); }
+//     let mut drained: Drain<'_, u32> = v.drain();
+//     sea::sassert!(drained.size_hint().0 == n);
+//     for i in 0..n {
+//         let front: bool = sea::nd_bool();
+//         if front { _ = drained.next(); }
+//         else { _ = drained.next_back(); }
 
-        sea::sassert!(drained.size_hint().0 == n-i-1);
-    }
-    drop(drained);
+//         sea::sassert!(drained.size_hint().0 == n-i-1);
+//     }
+//     drop(drained);
 
-    sea::sassert!(v.len == 0);
-}
+//     sea::sassert!(v.len == 0);
+// }
 
-#[no_mangle]
-fn test_drain_drop() {
-    let n: u32 = 10;
-    static mut DROP_COUNT: u32 = 0;
-    pub struct DropTest { _value: u32, }
-    impl Drop for DropTest {
-        fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
-    }
+// #[no_mangle]
+// fn test_drain_drop() {
+//     let n: u32 = 10;
+//     static mut DROP_COUNT: u32 = 0;
+//     pub struct DropTest { _value: u32, }
+//     impl Drop for DropTest {
+//         fn drop(&mut self) { unsafe { DROP_COUNT += 1; } }
+//     }
 
-    let mut v: CustomVec<DropTest> = CustomVec::new();
-    v.push(DropTest { _value: 0 });
-    for i in 0..n {
-        v.push(DropTest { _value: i });
-    }
-    v.push(DropTest { _value: 0 });
+//     let mut v: CustomVec<DropTest> = CustomVec::new();
+//     v.push(DropTest { _value: 0 });
+//     for i in 0..n {
+//         v.push(DropTest { _value: i });
+//     }
+//     v.push(DropTest { _value: 0 });
 
-    let mut drained: Drain<'_, DropTest> = v.drain();
-    _ = drained.next();
-    _ = drained.next();
-    _ = drained.next_back();
-    _ = drained.next();
-    _ = drained.next_back();
+//     let mut drained: Drain<'_, DropTest> = v.drain();
+//     _ = drained.next();
+//     _ = drained.next();
+//     _ = drained.next_back();
+//     _ = drained.next();
+//     _ = drained.next_back();
 
-    sea::sassert!(unsafe { DROP_COUNT == 5 });
+//     sea::sassert!(unsafe { DROP_COUNT == 5 });
 
-    drop(drained);
-    sea::sassert!(unsafe { DROP_COUNT == n+2 });
+//     drop(drained);
+//     sea::sassert!(unsafe { DROP_COUNT == n+2 });
 
-    v.push(DropTest { _value: 0 });
-    sea::sassert!(v.len == 1);
+//     v.push(DropTest { _value: 0 });
+//     sea::sassert!(v.len == 1);
 
-    drop(v);
-    sea::sassert!(unsafe { DROP_COUNT == n+3 });
-}
+//     drop(v);
+//     sea::sassert!(unsafe { DROP_COUNT == n+3 });
+// }
 
-#[no_mangle]
-fn test_alignment() {
-    #[repr(align(2))]
-    struct ZST { }
+// #[no_mangle]
+// fn test_alignment() {
+//     #[repr(align(2))]
+//     struct ZST { }
 
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for _ in 0.. 10 { v.push(0); }
-    let mut iter: IntoIter<u32> = v.into_iter();
-    for i in 0.. 10 {
-        if i%2 == 0 {
-            _ = iter.next();
-        } else {
-            _ = iter.next_back();
-        }
-    }
-    drop(iter);
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for _ in 0.. 10 { v.push(0); }
+//     let mut iter: IntoIter<u32> = v.into_iter();
+//     for i in 0.. 10 {
+//         if i%2 == 0 {
+//             _ = iter.next();
+//         } else {
+//             _ = iter.next_back();
+//         }
+//     }
+//     drop(iter);
 
-    let mut v: CustomVec<u32> = CustomVec::new();
-    for _ in 0.. 10 { v.push(0); }
-    let mut drain: Drain<'_, u32> = v.drain();
-    for i in 0.. 10 {
-        if i%2 == 0 {
-            _ = drain.next();
-        } else {
-            _ = drain.next_back();
-        }
-    }
-    drop(drain);
+//     let mut v: CustomVec<u32> = CustomVec::new();
+//     for _ in 0.. 10 { v.push(0); }
+//     let mut drain: Drain<'_, u32> = v.drain();
+//     for i in 0.. 10 {
+//         if i%2 == 0 {
+//             _ = drain.next();
+//         } else {
+//             _ = drain.next_back();
+//         }
+//     }
+//     drop(drain);
 
-    let mut v: CustomVec<ZST> = CustomVec::new();
-    for _ in 0.. 10 { v.push(ZST {}); }
-    let mut iter: IntoIter<ZST> = v.into_iter();
-    for i in 0.. 10 {
-        if i%2 == 0 {
-            _ = iter.next();
-        } else {
-            _ = iter.next_back();
-        }
-    }
-    drop(iter);
+//     let mut v: CustomVec<ZST> = CustomVec::new();
+//     for _ in 0.. 10 { v.push(ZST {}); }
+//     let mut iter: IntoIter<ZST> = v.into_iter();
+//     for i in 0.. 10 {
+//         if i%2 == 0 {
+//             _ = iter.next();
+//         } else {
+//             _ = iter.next_back();
+//         }
+//     }
+//     drop(iter);
 
-    let mut v: CustomVec<ZST> = CustomVec::new();
-    for _ in 0.. 10 { v.push(ZST {}); }
-    let mut drain: Drain<'_, ZST> = v.drain();
-    for i in 0.. 10 {
-        if i%2 == 0 {
-            _= drain.next();
-        } else {
-            _ = drain.next_back();
-        }
-    }
-    drop(drain);
-}
+//     let mut v: CustomVec<ZST> = CustomVec::new();
+//     for _ in 0.. 10 { v.push(ZST {}); }
+//     let mut drain: Drain<'_, ZST> = v.drain();
+//     for i in 0.. 10 {
+//         if i%2 == 0 {
+//             _= drain.next();
+//         } else {
+//             _ = drain.next_back();
+//         }
+//     }
+//     drop(drain);
+// }
+
 
 impl<T> Drop for CustomVec<T> {
     fn drop(&mut self) {
-        unsafe {
-            if mem::size_of::<T>() == 0 {
-                for _ in 0.. self.len { _ = self.pop(); }
-            } else {
-                let slice: &mut [T] = core::slice::from_raw_parts_mut(self.ptr(), self.len);
-                let copy_ptr: *mut T = alloc(Layout::array::<T>(self.len).unwrap()) as *mut T;
-                copy_ptr.copy_from_nonoverlapping(slice.as_ptr(), self.len);
-    
-                let copy_slice: &mut [T] = core::slice::from_raw_parts_mut(copy_ptr, self.len);
-    
-                _ = Box::from_raw(copy_slice as *mut [T]);
-            }
+        // sea::sea_printf!("Before Drop While Loop");
+        // let mut i = 0;
+        while let Some(_) = self.pop() {
+            // sea::sea_printf!("In While Loop");
+            // // let size = mem::size_of::<T>();
+            // // if size == usize::MAX { sea::sassert!(false); }
+            
+            // if i == 19 {
+            //     sea::sassert!(false);
+            // }
+            // i += 1;
         }
+        // panic!();
+
+        sea::sassert!(false);
+        // sea::sea_printf!("After Drop While Loop");
+
+        // unsafe {
+        //     if mem::size_of::<T>() == 0 {
+        //         for _ in 0.. self.len { _ = self.pop(); }
+        //     } else {
+        //         let slice: &mut [T] = core::slice::from_raw_parts_mut(self.ptr(), self.len);
+        //         let copy_ptr: *mut T = alloc(Layout::array::<T>(self.len).unwrap()) as *mut T;
+        //         copy_ptr.copy_from_nonoverlapping(slice.as_ptr(), self.len);
+    
+        //         let copy_slice: &mut [T] = core::slice::from_raw_parts_mut(copy_ptr, self.len);
+    
+        //         _ = Box::from_raw(copy_slice as *mut [T]);
+        //     }
+        // }
         // deallocation is handled by RawVec
     }
 }
@@ -570,8 +588,6 @@ fn test_zst() {
 //     drop(iter);
 //     sea::sassert!(unsafe { DROP_COUNT == 6 });
 // }
-
-
 
 fn custom_vec_valid_after_init<T>(vec: &CustomVec<T>) -> bool {
     vec.len == 0 &&

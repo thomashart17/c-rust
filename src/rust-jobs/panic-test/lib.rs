@@ -22,4 +22,7 @@ fn test() {
 
     // panic!();
     // core::panicking::panic("explicit panic");
+
+    // False assertions call panic
+    // assert!(false);
 }

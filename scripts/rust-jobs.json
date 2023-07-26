@@ -27,6 +27,7 @@
         "result-iter_mut",
         "result-transpose",
         "result-unwrap_or_else",
+        "sea-vec",
         "smallvec",
         "string-parse",
         "tinyvec-arrayvec",

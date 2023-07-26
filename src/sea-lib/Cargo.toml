@@ -11,6 +11,7 @@ crate-type = ["staticlib", "lib"]
 
 [dependencies]
 libc = "0.2"
+unroll = "0.1.5"
 sea = { version = "0.1.0", optional = true }
 
 [dependencies.custom-print]

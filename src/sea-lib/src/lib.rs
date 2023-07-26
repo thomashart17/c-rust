@@ -2,7 +2,7 @@
 
 #![feature(core_intrinsics)]
 #![feature(alloc_error_handler)]
-
+#![feature(slice_ptr_get)] 
 
 #[cfg(all(feature = "std", feature = "panic_error"))]
 compile_error!("Features \"std\" and \"panic_error\" are mutually exclusive and cannot be enabled at the same time.
@@ -16,5 +16,7 @@ pub mod error_handle;
 
 pub mod bindings;
 pub mod print_macros;
+pub mod sea_vec;
+pub use sea_vec::*;
 pub mod seahorn;
 pub use seahorn::*;

@@ -1,7 +1,7 @@
 cargo-features = ["profile-rustflags"]
 
 [package]
-name = "smallvec-lib"
+name = "smallvec-bound8-lib"
 version = "0.1.0"
 edition = "2021"
 

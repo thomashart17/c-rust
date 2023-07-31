@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 libc = "0.2"
-tinyvec = "0.2.0"
+tinyvec = "0.2.0"  # Latest release that still contains the error
 
 [dependencies.sea]
 path = "../../sea-lib"

@@ -29,6 +29,7 @@
         "result-unwrap_or_else",
         "sea-vec",
         "smallvec",
+        "smallvec-allocation",
         "smallvec-bound2",
         "smallvec-bound4",
         "smallvec-bound8",

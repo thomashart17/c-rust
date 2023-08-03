@@ -10,13 +10,14 @@ pub extern "C" fn entrypt() {
     match v {
         0 => test_append(),
         1 => test_drain(),
-        2 => test_insert_many(),
-        3 => test_insert_many_panic(),
-        4 => test_resize(),
-        5 => test_resize2(),
-        6 => test_resize_with(),
-        7 => test_resize_with2(),
-        8 => test_shrink_to_fit(),
+        2 => test_drain_panic(),
+        3 => test_insert_many(),
+        4 => test_insert_many_panic(),
+        5 => test_resize(),
+        6 => test_resize2(),
+        7 => test_resize_with(),
+        8 => test_resize_with2(),
+        9 => test_shrink_to_fit(),
         _ => ()
     }
 }

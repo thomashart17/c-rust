@@ -61,8 +61,10 @@ extern "C" { pub fn sea_nd_u32() -> u32; }
 extern "C" { pub fn sea_nd_i64() -> i64; }
 extern "C" { pub fn sea_nd_u64() -> u64; }
 extern "C" { pub fn sea_nd_usize() -> usize; }
-extern "C" { pub fn sea_nd_intptr() -> isize; }
+extern "C" { pub fn sea_nd_isize() -> isize; }
 extern "C" { pub fn sea_nd_uintptr() -> usize; }
+extern "C" { pub fn sea_nd_intptr() -> isize; }
+
 
 
 

@@ -3,6 +3,15 @@
 
 use sea;
 
+
+// ************************************
+//      Reminder:
+//          When using custom panic, make sure to update CMakeLists.txt
+//          Add CUSTOM_PANIC_NO_STD as a variable argument
+//          Also make sure to pass features = ["panic_error"] under sea
+// ************************************
+
+
 #[no_mangle]
 pub extern "C" fn entrypt() {
     test();
@@ -20,7 +29,7 @@ fn test() {
     }
     sea::sassert!(v == original + 2);
 
-    // panic!();
+    panic!();
     // core::panicking::panic("explicit panic");
 
     // False assertions call panic

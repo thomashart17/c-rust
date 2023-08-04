@@ -1,6 +1,8 @@
 {
     "jobs": [
         "add",
+        "borsh",
+        "copy_stack_buffer",
         "custom-print",
         "custom-print-no-std",
         "custom-print-writer",
@@ -28,6 +30,7 @@
         "result-transpose",
         "result-unwrap_or_else",
         "sea-vec",
+        "serde",
         "smallvec",
         "smallvec-bound2",
         "smallvec-bound4",

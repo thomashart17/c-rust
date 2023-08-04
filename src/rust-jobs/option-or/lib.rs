@@ -22,5 +22,5 @@ pub extern "C" fn entrypt() {
     } else {
         sea::sassert!(result == w);
     }
-    panic!();
+    // panic!();
 }

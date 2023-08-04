@@ -1,0 +1,3 @@
+c_rust_llvm(copy_stack_buffer copy_stack_buffer.c)
+
+sea_add_unsat_test(copy_stack_buffer)

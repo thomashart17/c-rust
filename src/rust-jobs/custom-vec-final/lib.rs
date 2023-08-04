@@ -17,14 +17,14 @@ use core::marker::PhantomData;
 
 #[no_mangle]
 pub extern "C" fn entrypt() {
-// Running all the tests causes seahorn to crash
+    // Running all the tests causes SeaHorn to crash
 
     // **********************
     // These tests are the same as those in custom-vec-raw_vec
     // test_new();
     // test_grow();
     // test_pop();
-    test_push();
+    // test_push();
     // test_drop();
     // test_deref();
     // test_deref_mut();
@@ -46,9 +46,9 @@ pub extern "C" fn entrypt() {
 
     // **********************
     // Tests for Zero Sized Types
-    // test_zst();
-    // test_alignment();
-    sea::sassert!(false);
+    test_zst();
+    test_alignment_bug();
+    // sea::sassert!(false);
 }
 
 
@@ -435,10 +435,10 @@ fn test_push() {
 
 impl<T> Drop for CustomVec<T> {
     fn drop(&mut self) {
-        // sea::sea_printf!("Before Drop While Loop");
+        sea::sea_printf!("Before Drop While Loop");
         // let mut i = 0;
         while let Some(_) = self.pop() {
-            // sea::sea_printf!("In While Loop");
+            sea::sea_printf!("In While Loop");
             // // let size = mem::size_of::<T>();
             // // if size == usize::MAX { sea::sassert!(false); }
             
@@ -449,7 +449,7 @@ impl<T> Drop for CustomVec<T> {
         }
         // panic!();
 
-        sea::sassert!(false);
+        // sea::sassert!(false);
         // sea::sea_printf!("After Drop While Loop");
 
         // unsafe {

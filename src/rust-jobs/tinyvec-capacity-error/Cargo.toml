@@ -13,7 +13,7 @@ path = "lib.rs"
 libc = "0.2"
 
 [dependencies.tinyvec]
-version = "1.6.0"
+version = "1.6.0"  # Latest release that still contains the error: https://github.com/Lokathor/tinyvec/pull/178
 features = ["rustc_1_55"]
 
 [dependencies.sea]

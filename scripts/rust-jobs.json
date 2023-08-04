@@ -35,6 +35,7 @@
         "smallvec-bound2",
         "smallvec-bound4",
         "smallvec-bound8",
+        "smallvec-drain-error",
         "string-parse",
         "tinyvec-arrayvec",
         "tinyvec-capacity-error",

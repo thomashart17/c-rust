@@ -8,8 +8,11 @@ use smallvec::SmallVec;
 pub extern "C" fn entrypt() {
     let v: u8 = sea::nd_u8();
     match v {
-        1 => test_remove(),
-        2 => test_swap_remove(),
+        1 => test_dedup(),
+        2 => test_dedup_by(),
+        3 => test_dedup_by_key(),
+        4 => test_remove(),
+        5 => test_swap_remove(),
         _ => ()
     }
 }

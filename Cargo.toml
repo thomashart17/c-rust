@@ -27,3 +27,9 @@ rustflags = [
    "-Clink-arg=-fuse-ld=lld",
    "-Zemit-thin-lto=no"
 ]
+
+[profile.dev.package.smallvec-drain-error-lib]
+overflow-checks = false
+
+[profile.release.package.smallvec-drain-error-lib]
+overflow-checks = false

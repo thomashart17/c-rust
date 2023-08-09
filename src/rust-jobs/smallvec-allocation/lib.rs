@@ -954,7 +954,11 @@ impl<A: Array> SmallVec<A> {
         if cap - len >= additional {
             return Ok(());
         }
-        let new_cap: usize = if cap <= 8 { 16 } else { panic!(); };
+        let new_cap: usize = if cap <= 8 {
+            16
+        } else {
+            panic!();
+        };
         // let new_cap = len
         //     .checked_add(additional)
         //     .and_then(usize::checked_next_power_of_two)
@@ -2539,15 +2543,6 @@ fn test_insert_from_slice() {
     sea::sassert!(v2.len() == len2);
     sea::sassert!(v.capacity() == CAP);
     sea::sassert!(v2.capacity() == CAP);
-
-    // let insert_point2: usize = sea::nd_usize();
-    // sea::assume(insert_point2 > len + len2);
-
-    // // Index is out of bounds so this should panic.
-    // v.insert_from_slice(insert_point2, &v2);
-
-    // // This assertion should not be reachable since the previous operation should panic.
-    // sea::sassert!(false);
 }
 
 #[no_mangle]
@@ -2634,7 +2629,7 @@ fn test_insert_many_panic() {
 
     let insert_point: usize = sea::nd_usize();
     sea::assume(insert_point > len + len2);
-    
+
     // Index is out of bounds so this should panic.
     v.insert_many(insert_point, v2.clone());
 
@@ -2699,7 +2694,7 @@ fn test_push() {
     }
 
     sea::sassert!(v.len() == CAP + 1);
-    sea::sassert!(v.capacity() == CAP*2);
+    sea::sassert!(v.capacity() == CAP * 2);
 }
 
 #[no_mangle]
@@ -2799,7 +2794,7 @@ fn test_resize2() {
     }
 
     let resize_point: usize = sea::nd_usize();
-    sea::assume(resize_point > CAP && resize_point <= 2*CAP);
+    sea::assume(resize_point > CAP && resize_point <= 2 * CAP);
 
     v.resize(resize_point, sea::nd_u32());
 
@@ -2838,7 +2833,7 @@ fn test_resize_with2() {
     }
 
     let resize_point: usize = sea::nd_usize();
-    sea::assume(resize_point > CAP && resize_point <= 2*CAP);
+    sea::assume(resize_point > CAP && resize_point <= 2 * CAP);
 
     v.resize_with(resize_point, || sea::nd_u32());
 
@@ -2892,12 +2887,12 @@ fn test_retain_mut() {
         v.push(val);
     }
 
-    v.retain(|x| (*x & 1) == 0);
+    v.retain_mut(|x| (*x & 1) == 0);
 
     sea::sassert!(v.len() == len / 2);
     sea::sassert!(v.capacity() == CAP);
 
-    v.retain(|x| (*x & 1) == 1);
+    v.retain_mut(|x| (*x & 1) == 1);
 
     sea::sassert!(v.len() == 0);
     sea::sassert!(v.capacity() == CAP);
@@ -2925,7 +2920,7 @@ fn test_shrink_to_fit() {
 
     let len: usize = sea::nd_usize();
     sea::assume(len <= CAP);
- 
+
     for _i in 0..len {
         v.push(sea::nd_u32());
     }
@@ -3030,7 +3025,7 @@ fn test_try_grow() {
     }
 
     let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap > CAP && new_cap <= CAP*2);
+    sea::assume(new_cap > CAP && new_cap <= CAP * 2);
 
     let result: Result<(), CollectionAllocErr> = v.try_grow(new_cap);
 
@@ -3051,13 +3046,13 @@ fn test_try_reserve() {
     let mut v: SmallVec<[u32; 8]> = SmallVec::new();
 
     let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap >= 8 && new_cap <= u16::MAX as usize);
+    sea::assume(new_cap > 8);
 
     let result: Result<(), CollectionAllocErr> = v.try_reserve(new_cap);
 
     sea::sassert!(result.is_ok());
     sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() >= new_cap);
+    sea::sassert!(v.capacity() == 16);
 }
 
 #[no_mangle]

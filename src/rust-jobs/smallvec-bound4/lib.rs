@@ -12,7 +12,7 @@ pub extern "C" fn entrypt() {
         1 => test_retain(),
         2 => test_retain_mut(),
         3 => test_try_grow(),
-        _ => ()
+        _ => (),
     }
 }
 
@@ -87,12 +87,12 @@ fn test_retain_mut() {
         v.push(val);
     }
 
-    v.retain(|x| (*x & 1) == 0);
+    v.retain_mut(|x| (*x & 1) == 0);
 
     sea::sassert!(v.len() == len / 2);
     sea::sassert!(v.capacity() == CAP);
 
-    v.retain(|x| (*x & 1) == 1);
+    v.retain_mut(|x| (*x & 1) == 1);
 
     sea::sassert!(v.len() == 0);
     sea::sassert!(v.capacity() == CAP);
@@ -111,7 +111,7 @@ fn test_try_grow() {
     }
 
     let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap > CAP && new_cap <= CAP*2);
+    sea::assume(new_cap > CAP && new_cap <= CAP * 2);
 
     let result: Result<(), smallvec::CollectionAllocErr> = v.try_grow(new_cap);
 

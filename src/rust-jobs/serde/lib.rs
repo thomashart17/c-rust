@@ -1,8 +1,6 @@
 #![no_std]
-#![feature(core_panic)]
 
-
-use serde::{Serialize, Deserialize, Serializer, Deserializer};
+// use serde::{Serialize, Deserialize, Serializer, Deserializer};
 // use heapless::Vec;
 
 use sea;
@@ -12,10 +10,10 @@ use sea;
 // use serde_cbor::{to_vec, from_slice};
 // use serde::__private::Vec;
 
-extern crate alloc;
-use alloc::vec::Vec;
-use serde_json_core::to_string;
-use serde_json_core::to_vec;
+// extern crate alloc;
+// use alloc::vec::Vec;
+// use serde_json_core::to_string;
+// use serde_json_core::to_vec;
 
 
 #[no_mangle]
@@ -27,27 +25,30 @@ pub extern "C" fn entrypt() {
     // panic!();
 }
 // use heapless::String;
-use alloc::string::String;
-use crate::alloc::string::ToString;
+// use alloc::string::String;
+// use crate::alloc::string::ToString;
 #[no_mangle]
 fn test() {
-    let mut v: i32  = sea::nd_i32();
-    sea::assume(v > 0);
-    let original: i32 = v;
+    let v: i32 = sea::nd_i32();
 
-    let n: *mut i32 = &mut v;
+    let result: Option<i32> = if (v & 1) == 1 { 
+        None 
+    } else { 
+        Some(v)
+    };
 
-    unsafe {
-        *n = *n + 1;
-        *n = *n + 1;
+    let result = result.unwrap_or(0);
+
+    if (v & 1) == 0 {
+        sea::sassert!(result == v);
+    } else {
+        sea::sassert!(result == 0);
     }
 
-    sea::sassert!(v == original + 2);
-
-    let x: bool = sea::nd_bool();
-    if x { panic!(); }
+    // let x: bool = sea::nd_bool();
+    // if x { panic!(); }
     // sea::sassert!(false);
-    let data: u32 = 10;
+    // let data: u32 = 10;
 
     // let serialized: serde_json_core::heapless::String<1> = serde_json_core::to_string(&data).unwrap();
     // let serialized: String = serde_json_core::to_string::<u32, 1>(&data).unwrap().to_string();

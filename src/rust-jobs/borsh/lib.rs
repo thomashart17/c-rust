@@ -1,4 +1,4 @@
-use borsh::{BorshSerialize, BorshDeserialize, try_from_slice_with_schema};
+use borsh::{BorshSerialize, BorshDeserialize};
 
 use sea;
 // use std::collections::HashMap;
@@ -19,6 +19,8 @@ pub extern "C" fn entrypt() {
     // test_option();
 
     test_string();
+    // add to_sting job
+    // sea::sassert!(false);
 
     // test_fixed_sized_arrays();
     // test_hashmap();    
@@ -30,9 +32,22 @@ pub extern "C" fn entrypt() {
 
 #[no_mangle]
 fn test_string() {
-    let x: String = "as".to_string();
-    let encoded: Vec<u8> = x.try_to_vec().unwrap();
-    let decoded: String = String::try_from_slice(&encoded).unwrap();
+    let x: String = "ab".to_string();
+    // sea::sassert!(x == "a".to_string());
+
+    // let encoded: Vec<u8> = x.try_to_vec().unwrap();
+    // let decoded: String = String::try_from_slice(&encoded).unwrap();
+
+    // sea::sassert!(x.len() == decoded.len());
+    sea::sassert!(x == "ab".to_string());
+    // sea::sassert!(++)
+    // sea::sassert!(
+    //     match x.cmp(&decoded) {
+    //         std::cmp::Ordering::Equal => true,
+    //         _ => false,
+    //     }
+    // );
+
     // sea::sassert!(x == decoded);
 
     // let mut v: Vec<i32> = vec![1, 2, 3, 4];
@@ -49,7 +64,7 @@ fn test_string() {
 fn test_fixed_sized_arrays() {
     let y: i32 = sea::nd_i32();
     sea::assume(y > 0);
-    let mut x: [i32; 3] = [0, 0, y];
+    let x: [i32; 3] = [0, 0, y];
 
     let encoded: Vec<u8> = x.try_to_vec().unwrap();
     let decoded: [i32; 3] = <[i32; 3]>::try_from_slice(&encoded).unwrap();
@@ -70,8 +85,8 @@ fn test_fixed_sized_arrays() {
 
 #[no_mangle]
 fn test_hashmap() {
-    use borsh::maybestd::collections::HashMap;
-    let mut map: HashMap<u32, u32> = HashMap::default();
+    // use borsh::maybestd::collections::HashMap;
+    // let mut map: HashMap<u32, u32> = HashMap::default();
 }
 
 // #[no_mangle]

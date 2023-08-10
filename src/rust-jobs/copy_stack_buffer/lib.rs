@@ -11,7 +11,7 @@
 pub extern "C" fn entrypt() {
     let mut reader: &[u8] = b"hello";
     let mut writer: Vec<u8> = vec![];
-    std::io::copy(&mut reader, &mut writer);
+    _ = std::io::copy(&mut reader, &mut writer);
 }
 
 

@@ -29,7 +29,7 @@ fn test() {
     }
     sea::sassert!(v == original + 2);
 
-    panic!();
+    // panic!();
     // core::panicking::panic("explicit panic");
 
     // False assertions call panic

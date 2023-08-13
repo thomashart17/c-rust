@@ -1,2 +1,21 @@
 verify_options:
   horn-explicit-sp0: true
+  # Rationale for the following option:
+  #
+  # 1. A tinyvec is initialized to type::default values on creation. In this
+  # test we request a vector of size u16::max Thus a backing array is filled
+  # with default elements upto requested size (u16::MAX ) . The way default
+  # elements are added to the array is by looping one-by-one
+  # (https://sourcegraph.com/github.com/Lokathor/tinyvec@350cf62/-/blob/src/array/const_generic_impl.rs?L21).
+  #
+  # Unrolling this big loop causes slowdown in VCGen and also CEX is very long.
+  # For this test, we don't care about the initialization so we replace loop out
+  # effects with non deterministic values. Loop inputs are not not touched. Thus
+  # the input array is not initialized. This implies that reading from this
+  # uninitialized array is UB.
+  #
+  # However, this is ok for the present use case because the property under
+  # consideration is unaffected by intialization (we never read the backing
+  # array). With the loop replaced by nd function, the verification is quicker
+  # and CEX is manageable.
+  replace-loops-with-nd-funcs: true

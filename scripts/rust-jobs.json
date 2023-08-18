@@ -42,6 +42,7 @@
         "smallvec-drain-error",
         "smallvec-grow-error",
         "smallvec-insert-optimization",
+        "smallvec-insert_many-error",
         "string-parse",
         "tinyvec-arrayvec",
         "tinyvec-capacity-error",

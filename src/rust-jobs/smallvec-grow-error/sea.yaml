@@ -1,0 +1,4 @@
+verify_options:
+  horn-explicit-sp0: true
+  bound: 16
+  

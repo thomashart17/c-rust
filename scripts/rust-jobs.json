@@ -37,6 +37,7 @@
         "smallvec-bound4",
         "smallvec-bound8",
         "smallvec-drain-error",
+        "smallvec-grow-error",
         "smallvec-insert-optimization",
         "string-parse",
         "tinyvec-arrayvec",

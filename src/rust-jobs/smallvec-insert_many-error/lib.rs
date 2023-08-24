@@ -1991,11 +1991,10 @@ pub extern "C" fn entrypt() {
 
     // Prepare an iterator with small lower bound
     let iter = (0u8..=255).filter(|n| n % 2 == 0);
-    sea::sassert!(iter.size_hint().0 == 0);
 
     // Triggering the bug
     v.insert_many(0, iter);
 
     // Uh oh, heap overflow made smallvec and string to overlap
-    sea::sassert!(v.as_ptr_range().contains(&s.as_ptr()));
+    sea::sassert!(!v.as_ptr_range().contains(&s.as_ptr()));
 }

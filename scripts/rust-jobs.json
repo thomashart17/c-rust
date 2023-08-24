@@ -43,6 +43,7 @@
         "smallvec-grow-error",
         "smallvec-insert-optimization",
         "smallvec-insert_many-error",
+        "smallvec-insert_many-fix",
         "string-parse",
         "tinyvec-arrayvec",
         "tinyvec-capacity-error",

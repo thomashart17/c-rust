@@ -44,6 +44,7 @@
         "smallvec-insert-optimization",
         "smallvec-insert_many-error",
         "smallvec-insert_many-fix",
+        "smallvec-memory-leak",
         "string-parse",
         "tinyvec-arrayvec",
         "tinyvec-capacity-error",

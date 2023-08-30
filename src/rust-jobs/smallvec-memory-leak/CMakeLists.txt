@@ -1,3 +1,3 @@
-c_rust_llvm(smallvec-memory-leak smallvec-memory-leak.c)
+c_rust_llvm(smallvec-memory-leak smallvec-memory-leak.c PANIC_UNWIND)
 
-sea_add_unsat_test(smallvec-memory-leak)
+sea_add_sat_test(smallvec-memory-leak)

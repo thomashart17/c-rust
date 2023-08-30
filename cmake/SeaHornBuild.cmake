@@ -19,6 +19,10 @@ function(c_rust_llvm TARGET SRC_FILES)
           "-Zbuild-std=panic_abort,std"
           "-Zbuild-std-features=default"
       )
+    elseif ("PANIC_UNWIND" IN_LIST ARGN)
+      corrosion_set_cargo_flags(${RUST_LIB_TARGET}
+          "-Zbuild-std-features=default"
+      )
     else()
       corrosion_set_cargo_flags(${RUST_LIB_TARGET}
           "-Zbuild-std=panic_abort,std"

@@ -1744,6 +1744,10 @@ impl<A:Array> ToSmallVec<A> for [A::Item]
 
 use sea;
 
+// https://github.com/servo/rust-smallvec/pull/213/commits/8ddf61330d73bd1b33ed01e03f2bf0b8aaba8d11
+// This commit fixed an issue with memory leaks in the "insert_many" function. We want to verify
+// that seahorn is able to catch the leak. The test is modified from the source code and causes the
+// leak by providing a panicking iterator in the call to "insert_many".
 #[no_mangle]
 pub extern "C" fn entrypt() {
     struct PanicOnDoubleDrop {

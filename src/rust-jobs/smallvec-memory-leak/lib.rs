@@ -1742,7 +1742,7 @@ impl<A:Array> ToSmallVec<A> for [A::Item]
     }
 }
 
-use sea;
+// use sea;
 
 // https://github.com/servo/rust-smallvec/pull/213/commits/8ddf61330d73bd1b33ed01e03f2bf0b8aaba8d11
 // This commit fixed an issue with memory leaks in the "insert_many" function. We want to verify

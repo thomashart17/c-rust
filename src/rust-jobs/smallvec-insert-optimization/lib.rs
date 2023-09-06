@@ -81,12 +81,6 @@
 #![cfg_attr(feature = "specialization", allow(incomplete_features))]
 #![cfg_attr(feature = "specialization", feature(specialization))]
 #![cfg_attr(feature = "may_dangle", feature(dropck_eyepatch))]
-#![cfg_attr(
-    feature = "debugger_visualizer",
-    feature(debugger_visualizer),
-    debugger_visualizer(natvis_file = "../debug_metadata/smallvec.natvis")
-)]
-// #![deny(missing_docs)]
 
 #[doc(hidden)]
 pub extern crate alloc;
@@ -212,7 +206,7 @@ macro_rules! smallvec {
 /// ```
 ///
 /// Note that the behavior mimics that of array expressions, in contrast to [`smallvec`].
-// #[cfg(feature = "const_new")]
+#[cfg(feature = "const_new")]
 #[cfg_attr(docsrs, doc(cfg(feature = "const_new")))]
 #[macro_export]
 macro_rules! smallvec_inline {
@@ -464,7 +458,7 @@ enum SmallVecData<A: Array> {
     Heap((*mut A::Item, usize)),
 }
 
-// #[cfg(all(not(feature = "union"), feature = "const_new"))]
+#[cfg(all(not(feature = "union"), feature = "const_new"))]
 impl<T, const N: usize> SmallVecData<[T; N]> {
     #[cfg_attr(docsrs, doc(cfg(feature = "const_new")))]
     #[inline]
@@ -555,6 +549,7 @@ pub struct SmallVec<A: Array> {
     // If capacity > Self::inline_capacity() then the heap variant is used and capacity holds the size of the memory allocation.
     capacity: usize,
     data: SmallVecData<A>,
+    copied: bool,
 }
 
 impl<A: Array> SmallVec<A> {
@@ -570,6 +565,7 @@ impl<A: Array> SmallVec<A> {
         SmallVec {
             capacity: 0,
             data: SmallVecData::from_inline(MaybeUninit::uninit()),
+            copied: false,
         }
     }
 
@@ -617,6 +613,7 @@ impl<A: Array> SmallVec<A> {
                 SmallVec {
                     capacity: len,
                     data,
+                    copied: false,
                 }
             }
         } else {
@@ -626,6 +623,7 @@ impl<A: Array> SmallVec<A> {
             SmallVec {
                 capacity: cap,
                 data: SmallVecData::from_heap(ptr, len),
+                copied: false,
             }
         }
     }
@@ -646,6 +644,7 @@ impl<A: Array> SmallVec<A> {
         SmallVec {
             capacity: A::size(),
             data: SmallVecData::from_inline(MaybeUninit::new(buf)),
+            copied: false,
         }
     }
 
@@ -687,6 +686,7 @@ impl<A: Array> SmallVec<A> {
         SmallVec {
             capacity: len,
             data: SmallVecData::from_inline(buf),
+            copied: false,
         }
     }
 
@@ -742,6 +742,11 @@ impl<A: Array> SmallVec<A> {
     #[inline]
     pub fn capacity(&self) -> usize {
         self.triple().2
+    }
+
+    #[inline]
+    pub fn copied(&self) -> bool {
+        self.copied
     }
 
     /// Returns a tuple with (data ptr, len, capacity)
@@ -957,10 +962,6 @@ impl<A: Array> SmallVec<A> {
         } else {
             panic!();
         };
-        // let new_cap = len
-        //     .checked_add(additional)
-        //     .and_then(usize::checked_next_power_of_two)
-        //     .ok_or(CollectionAllocErr::CapacityOverflow)?;
         self.try_grow(new_cap)
     }
 
@@ -1079,12 +1080,15 @@ impl<A: Array> SmallVec<A> {
     pub fn insert(&mut self, index: usize, element: A::Item) {
         self.reserve(1);
 
+        let mut copied: bool = false;
+
         unsafe {
             let (mut ptr, len_ptr, _) = self.triple_mut();
             let len = *len_ptr;
             ptr = ptr.add(index);
             if index < len {
                 ptr::copy(ptr, ptr.add(1), len - index);
+                copied = true;
             } else if index == len {
                 // No elements need shifting.
             } else {
@@ -1093,6 +1097,8 @@ impl<A: Array> SmallVec<A> {
             *len_ptr = len + 1;
             ptr::write(ptr, element);
         }
+
+        self.copied = copied;
     }
 
     /// Insert multiple elements at position `index`, shifting all following elements toward the
@@ -1237,15 +1243,6 @@ impl<A: Array> SmallVec<A> {
             }
         }
         self.truncate(len - del);
-    }
-
-    /// Retains only the elements specified by the predicate.
-    ///
-    /// This method is identical in behaviour to [`retain`]; it is included only
-    /// to maintain api-compatability with `std::Vec`, where the methods are
-    /// separate for historical reasons.
-    pub fn retain_mut<F: FnMut(&mut A::Item) -> bool>(&mut self, f: F) {
-        self.retain(f)
     }
 
     /// Removes consecutive duplicate elements.
@@ -1413,6 +1410,7 @@ impl<A: Array> SmallVec<A> {
         SmallVec {
             capacity,
             data: SmallVecData::from_heap(ptr, length),
+            copied: false,
         }
     }
 
@@ -1454,6 +1452,7 @@ where
                     );
                     data
                 }),
+                copied: false,
             }
         } else {
             let mut b = slice.to_vec();
@@ -1462,6 +1461,7 @@ where
             SmallVec {
                 capacity: cap,
                 data: SmallVecData::from_heap(ptr, len),
+                copied: false
             }
         }
     }
@@ -2060,7 +2060,7 @@ impl<'a> Drop for SetLenOnDrop<'a> {
     }
 }
 
-// #[cfg(feature = "const_new")]
+#[cfg(feature = "const_new")]
 impl<T, const N: usize> SmallVec<[T; N]> {
     /// Construct an empty vector.
     ///
@@ -2071,6 +2071,7 @@ impl<T, const N: usize> SmallVec<[T; N]> {
         SmallVec {
             capacity: 0,
             data: SmallVecData::from_const(MaybeUninit::uninit()),
+            copied: false,
         }
     }
 
@@ -2083,39 +2084,38 @@ impl<T, const N: usize> SmallVec<[T; N]> {
         SmallVec {
             capacity: N,
             data: SmallVecData::from_const(MaybeUninit::new(items)),
+            copied: false,
         }
     }
 }
 
-// #[cfg(all(feature = "const_generics", not(doc)))]
+#[cfg(all(feature = "const_generics", not(doc)))]
 #[cfg_attr(docsrs, doc(cfg(feature = "const_generics")))]
 unsafe impl<T, const N: usize> Array for [T; N] {
     type Item = T;
-    #[inline]
     fn size() -> usize {
         N
     }
 }
 
-// #[cfg(any(not(feature = "const_generics"), doc))]
-// macro_rules! impl_array(
-//     ($($size:expr),+) => {
-//         $(
-//             unsafe impl<T> Array for [T; $size] {
-//                 type Item = T;
-//                 #[inline]
-//                 fn size() -> usize { $size }
-//             }
-//         )+
-//     }
-// );
+#[cfg(any(not(feature = "const_generics"), doc))]
+macro_rules! impl_array(
+    ($($size:expr),+) => {
+        $(
+            unsafe impl<T> Array for [T; $size] {
+                type Item = T;
+                fn size() -> usize { $size }
+            }
+        )+
+    }
+);
 
-// #[cfg(any(not(feature = "const_generics"), doc))]
-// impl_array!(
-//     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-//     26, 27, 28, 29, 30, 31, 32, 36, 0x40, 0x60, 0x80, 0x100, 0x200, 0x400, 0x600, 0x800, 0x1000,
-//     0x2000, 0x4000, 0x6000, 0x8000, 0x10000, 0x20000, 0x40000, 0x60000, 0x80000, 0x10_0000
-// );
+#[cfg(any(not(feature = "const_generics"), doc))]
+impl_array!(
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+    26, 27, 28, 29, 30, 31, 32, 36, 0x40, 0x60, 0x80, 0x100, 0x200, 0x400, 0x600, 0x800, 0x1000,
+    0x2000, 0x4000, 0x6000, 0x8000, 0x10000, 0x20000, 0x40000, 0x60000, 0x80000, 0x10_0000
+);
 
 /// Convenience trait for constructing a `SmallVec`
 pub trait ToSmallVec<A: Array> {
@@ -2135,402 +2135,33 @@ where
 
 use sea;
 
+// https://github.com/servo/rust-smallvec/commit/b2335682bcaf6d0b33d6c0caeb077d9aaa608b6d
+// We want to verify that the optimizations to "insert" made in this commit work as intended
+// and don't error/panic unexpectedly. The source code for smallvec is modified to track whether
+// or not there is a call to "copy" in "insert". Here we verify that "copied" is only set to true
+// when the insertion point is not at the end of the vector. In the Cargo configuration, we have
+// the "panic_error" feature enabled to ensure that there are no unexpected panics.
 #[no_mangle]
 pub extern "C" fn entrypt() {
-    let v: u8 = sea::nd_u8();
-    match v {
-        0 => test_clear(),
-        1 => test_extend_from_slice(),
-        2 => test_from_buf(),
-        3 => test_from_buf_and_len(),
-        4 => test_from_buf_and_len_unchecked(),
-        5 => test_from_const(),
-        6 => test_from_elem(),
-        7 => test_from_raw_parts(),
-        8 => test_from_slice(),
-        9 => test_grow(),
-        10 => test_insert(),
-        11 => test_insert_from_slice(),
-        12 => test_new(),
-        13 => test_new_const(),
-        14 => test_pop(),
-        15 => test_reserve(),
-        16 => test_reserve_exact(),
-        17 => test_set_len(),
-        18 => test_truncate(),
-        19 => test_try_reserve(),
-        20 => test_try_reserve_exact(),
-        21 => test_with_capacity(),
-        _ => (),
-    }
-}
-
-#[no_mangle]
-fn test_clear() {
     let mut v: SmallVec<[u32; 8]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    v.clear();
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_extend_from_slice() {
-    let mut v1: SmallVec<[u32; 8]> = SmallVec::new();
-    let mut v2: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
-        v1.push(sea::nd_u32());
-    }
-
-    let len2: usize = sea::nd_usize();
-    sea::assume(len2 <= 8);
-
-    for _i in 0..len2 {
-        v2.push(sea::nd_u32());
-    }
-
-    v1.extend_from_slice(&v2);
-
-    sea::sassert!(v1.len() == len + len2);
-    sea::sassert!(v1.capacity() >= 8);
-}
-
-#[no_mangle]
-fn test_from_buf() {
-    let buf: [u32; 8] = [sea::nd_u32(); 8];
-
-    let v: SmallVec<[u32; 8]> = SmallVec::from_buf(buf);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_buf_and_len() {
-    let buf: [u32; 8] = [sea::nd_u32(); 8];
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    let v: SmallVec<[u32; 8]> = SmallVec::from_buf_and_len(buf, len);
-
-    sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_buf_and_len_unchecked() {
-    let buf: [u32; 8] = [sea::nd_u32(); 8];
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    let v: SmallVec<[u32; 8]> =
-        unsafe { SmallVec::from_buf_and_len_unchecked(MaybeUninit::new(buf), len) };
-
-    sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_const() {
-    let v: SmallVec<[u32; 8]> = SmallVec::from_const([sea::nd_u32(); 8]);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_elem() {
-    let elem: u32 = sea::nd_u32();
-
-    let v: SmallVec<[u32; 8]> = SmallVec::from_elem(elem, 8);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-
-    for i in 0..8 {
-        sea::sassert!(v[i] == elem);
-    }
-}
-
-#[no_mangle]
-fn test_from_raw_parts() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    let ptr: *mut u32 = v.as_mut_ptr();
-
-    unsafe {
-        mem::forget(v);
-
-        // Capacity has to be greater than original capacity for this to work.
-        let v2: SmallVec<[u32; 8]> = SmallVec::from_raw_parts(ptr, len, 16);
-
-        sea::sassert!(v2.len() == len);
-        sea::sassert!(v2.capacity() == 16);
-    }
-}
-
-#[no_mangle]
-fn test_from_slice() {
-    let mut buf: [u32; 8] = [0; 8];
-
-    for i in 0..8 {
-        buf[i] = sea::nd_u32();
-    }
-
-    let v: SmallVec<[u32; 8]> = SmallVec::from_slice(&buf);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_grow() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap >= 8 && new_cap <= 16);
-
-    v.grow(new_cap);
-
-    sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == new_cap);
-}
-
-#[no_mangle]
-fn test_insert() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len > 0 && len < 6);
+    sea::assume(len < 8);
 
     for _i in 0..len {
         v.push(sea::nd_u32());
     }
 
     let insert_point: usize = sea::nd_usize();
-    sea::assume(insert_point < len);
+    sea::assume(insert_point <= len);
+
     v.insert(insert_point, sea::nd_u32());
 
+    if insert_point == len {
+        sea::sassert!(v.copied() == false);
+    } else {
+        sea::sassert!(v.copied() == true);
+    }
+
     sea::sassert!(v.len() == len + 1);
-    sea::sassert!(v.capacity() == 8);
-
-    let insert_point2: usize = sea::nd_usize();
-    sea::assume(insert_point2 > len + 1);
-
-    // Index is out of bounds so this should panic.
-    v.insert(insert_point2, sea::nd_u32());
-
-    // Previous insertion should panic so this shouldn't be reachable.
-    sea::sassert!(false);
-}
-
-#[no_mangle]
-fn test_insert_from_slice() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-    let mut v2: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    let len2: usize = sea::nd_usize();
-    sea::assume(len + len2 <= 8);
-
-    for _i in 0..len2 {
-        v2.push(sea::nd_u32());
-    }
-
-    let insert_point: usize = sea::nd_usize();
-    sea::assume(insert_point < len);
-
-    v.insert_from_slice(insert_point, &v2);
-
-    sea::sassert!(v.len() == len + len2);
-    sea::sassert!(v2.len() == len2);
-    sea::sassert!(v.capacity() == 8);
-    sea::sassert!(v2.capacity() == 8);
-
-    let insert_point2: usize = sea::nd_usize();
-    sea::assume(insert_point2 > len + len2);
-
-    // Index is out of bounds so this should panic.
-    v.insert_from_slice(insert_point2, &v2);
-
-    // This assertion should not be reachable since the previous operation should panic.
-    sea::sassert!(false);
-}
-
-#[no_mangle]
-fn test_new() {
-    let v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_new_const() {
-    let v: SmallVec<[u32; 8]> = SmallVec::new_const();
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_pop() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len > 0 && len <= 8);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    for i in 0..len {
-        v.pop();
-        sea::sassert!(v.len() == len - i - 1);
-    }
-
-    let result: Option<u32> = v.pop();
-    sea::sassert!(result.is_none());
-}
-
-#[no_mangle]
-fn test_reserve() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap > 8);
-
-    v.reserve(new_cap);
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 16);
-}
-
-#[no_mangle]
-fn test_reserve_exact() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap >= 8 && new_cap <= 16);
-
-    v.reserve_exact(new_cap);
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == new_cap);
-}
-
-#[no_mangle]
-fn test_set_len() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    unsafe {
-        v.set_len(len);
-    }
-
-    sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_truncate() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    let truncate_point: usize = sea::nd_usize();
-    sea::assume(truncate_point <= len);
-
-    v.truncate(truncate_point);
-
-    sea::sassert!(v.len() == truncate_point);
-    sea::sassert!(v.capacity() == 8);
-
-    let truncate_point2: usize = sea::nd_usize();
-    sea::assume(truncate_point2 > truncate_point);
-
-    v.truncate(truncate_point2);
-
-    sea::sassert!(v.len() == truncate_point);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_try_reserve() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap > 8);
-
-    let result: Result<(), CollectionAllocErr> = v.try_reserve(new_cap);
-
-    sea::sassert!(result.is_ok());
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 16);
-}
-
-#[no_mangle]
-fn test_try_reserve_exact() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap >= 8 && new_cap <= u16::MAX as usize);
-
-    let result: Result<(), CollectionAllocErr> = v.try_reserve_exact(new_cap);
-
-    sea::sassert!(result.is_ok());
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == new_cap);
-}
-
-#[no_mangle]
-fn test_with_capacity() {
-    let cap: usize = sea::nd_usize();
-    sea::assume(cap >= 8);
-
-    let v: SmallVec<[u32; 8]> = SmallVec::with_capacity(cap);
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == cap);
 }

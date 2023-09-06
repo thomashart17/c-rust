@@ -1,0 +1,4 @@
+verify_options:
+  horn-explicit-sp0: true
+  bound: 4
+  horn-bv2-word-size: 1

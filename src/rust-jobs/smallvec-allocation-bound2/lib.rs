@@ -2139,233 +2139,127 @@ use sea;
 pub extern "C" fn entrypt() {
     let v: u8 = sea::nd_u8();
     match v {
-        0 => test_clear(),
-        1 => test_extend_from_slice(),
-        2 => test_from_buf(),
-        3 => test_from_buf_and_len(),
-        4 => test_from_buf_and_len_unchecked(),
-        5 => test_from_const(),
-        6 => test_from_elem(),
-        7 => test_from_raw_parts(),
-        8 => test_from_slice(),
-        9 => test_grow(),
-        10 => test_insert(),
-        11 => test_insert_from_slice(),
-        12 => test_new(),
-        13 => test_new_const(),
-        14 => test_pop(),
-        15 => test_reserve(),
-        16 => test_reserve_exact(),
-        17 => test_set_len(),
-        18 => test_truncate(),
-        19 => test_try_reserve(),
-        20 => test_try_reserve_exact(),
-        21 => test_with_capacity(),
-        _ => (),
+        0 => test_append(),
+        1 => test_drain(),
+        2 => test_drain_panic(),
+        3 => test_insert_many(),
+        4 => test_insert_many_panic(),
+        5 => test_resize(),
+        6 => test_resize2(),
+        7 => test_resize_with(),
+        8 => test_resize_with2(),
+        9 => test_shrink_to_fit(),
+        _ => ()
     }
 }
 
 #[no_mangle]
-fn test_clear() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
+fn test_append() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
+    sea::assume(len <= CAP);
 
     for _i in 0..len {
         v.push(sea::nd_u32());
     }
 
-    v.clear();
+    let mut v2: SmallVec<[u32; CAP]> = SmallVec::new();
 
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 8);
+    let len2: usize = sea::nd_usize();
+    sea::assume(len2 <= CAP);
+
+    for _i in 0..len2 {
+        v2.push(sea::nd_u32());
+    }
+
+    v.append(&mut v2);
+
+    sea::sassert!(v.len() == len + len2);
+    sea::sassert!(v.capacity() >= CAP);
 }
 
 #[no_mangle]
-fn test_extend_from_slice() {
-    let mut v1: SmallVec<[u32; 8]> = SmallVec::new();
-    let mut v2: SmallVec<[u32; 8]> = SmallVec::new();
+fn test_drain() {
+    const CAP: usize = 2;
+    let mut v1: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
+    sea::assume(len <= CAP);
 
     for _i in 0..len {
         v1.push(sea::nd_u32());
     }
 
-    let len2: usize = sea::nd_usize();
-    sea::assume(len2 <= 8);
+    let drain_point: usize = sea::nd_usize();
+    sea::assume(drain_point < len);
+    let mut v2: SmallVec<[u32; CAP]> = v1.drain(drain_point..).collect();
 
-    for _i in 0..len2 {
-        v2.push(sea::nd_u32());
-    }
+    sea::sassert!(v1.len() == drain_point);
+    sea::sassert!(v2.len() == len - drain_point);
 
-    v1.extend_from_slice(&v2);
+    let v3: SmallVec<[u32; CAP]> = v1.drain(drain_point..).collect();
 
-    sea::sassert!(v1.len() == len + len2);
-    sea::sassert!(v1.capacity() >= 8);
+    sea::sassert!(v1.len() == drain_point);
+    sea::sassert!(v3.len() == 0);
+
+    let drain_point2: usize = sea::nd_usize();
+    sea::assume(drain_point2 < len - drain_point);
+    let v4: SmallVec<[u32; CAP]> = v2.drain(drain_point2..len - drain_point).collect();
+
+    sea::sassert!(v2.len() == drain_point2);
+    sea::sassert!(v4.len() == len - drain_point - drain_point2);
 }
 
 #[no_mangle]
-fn test_from_buf() {
-    let buf: [u32; 8] = [sea::nd_u32(); 8];
-
-    let v: SmallVec<[u32; 8]> = SmallVec::from_buf(buf);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_buf_and_len() {
-    let buf: [u32; 8] = [sea::nd_u32(); 8];
+fn test_drain_panic() {
+    const CAP: usize = 2;
+    let mut v1: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    let v: SmallVec<[u32; 8]> = SmallVec::from_buf_and_len(buf, len);
-
-    sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_buf_and_len_unchecked() {
-    let buf: [u32; 8] = [sea::nd_u32(); 8];
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    let v: SmallVec<[u32; 8]> =
-        unsafe { SmallVec::from_buf_and_len_unchecked(MaybeUninit::new(buf), len) };
-
-    sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_const() {
-    let v: SmallVec<[u32; 8]> = SmallVec::from_const([sea::nd_u32(); 8]);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_from_elem() {
-    let elem: u32 = sea::nd_u32();
-
-    let v: SmallVec<[u32; 8]> = SmallVec::from_elem(elem, 8);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-
-    for i in 0..8 {
-        sea::sassert!(v[i] == elem);
-    }
-}
-
-#[no_mangle]
-fn test_from_raw_parts() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
+    sea::assume(len <= CAP);
 
     for _i in 0..len {
-        v.push(sea::nd_u32());
+        v1.push(sea::nd_u32());
     }
 
-    let ptr: *mut u32 = v.as_mut_ptr();
+    if sea::nd_bool() {
+        let drain_point: usize = sea::nd_usize();
+        sea::assume(drain_point > len);
 
-    unsafe {
-        mem::forget(v);
+        // End is greater than length, so this should panic.
+        let _: SmallVec<[u32; CAP]> = v1.drain(drain_point..).collect();
+    } else {
+        let drain_point: usize = sea::nd_usize();
+        let drain_point2: usize = sea::nd_usize();
+        sea::assume(drain_point < len);
+        sea::assume(drain_point2 < len);
+        sea::assume(drain_point2 > drain_point);
 
-        // Capacity has to be greater than original capacity for this to work.
-        let v2: SmallVec<[u32; 8]> = SmallVec::from_raw_parts(ptr, len, 16);
-
-        sea::sassert!(v2.len() == len);
-        sea::sassert!(v2.capacity() == 16);
-    }
-}
-
-#[no_mangle]
-fn test_from_slice() {
-    let mut buf: [u32; 8] = [0; 8];
-
-    for i in 0..8 {
-        buf[i] = sea::nd_u32();
+        // Start is greater than end, so this should panic.
+        let _: SmallVec<[u32; CAP]> = v1.drain(drain_point2..drain_point).collect();
     }
 
-    let v: SmallVec<[u32; 8]> = SmallVec::from_slice(&buf);
-
-    sea::sassert!(v.len() == 8);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_grow() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap >= 8 && new_cap <= 16);
-
-    v.grow(new_cap);
-
-    sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == new_cap);
-}
-
-#[no_mangle]
-fn test_insert() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len > 0 && len < 6);
-
-    for _i in 0..len {
-        v.push(sea::nd_u32());
-    }
-
-    let insert_point: usize = sea::nd_usize();
-    sea::assume(insert_point < len);
-    v.insert(insert_point, sea::nd_u32());
-
-    sea::sassert!(v.len() == len + 1);
-    sea::sassert!(v.capacity() == 8);
-
-    let insert_point2: usize = sea::nd_usize();
-    sea::assume(insert_point2 > len + 1);
-
-    // Index is out of bounds so this should panic.
-    v.insert(insert_point2, sea::nd_u32());
-
-    // Previous insertion should panic so this shouldn't be reachable.
+    // This assertion should not be reachable since the previous call to drain should panic.
     sea::sassert!(false);
 }
 
 #[no_mangle]
-fn test_insert_from_slice() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-    let mut v2: SmallVec<[u32; 8]> = SmallVec::new();
+fn test_insert_many() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
+    let mut v2: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
+    sea::assume(len <= CAP);
 
     for _i in 0..len {
         v.push(sea::nd_u32());
     }
 
     let len2: usize = sea::nd_usize();
-    sea::assume(len + len2 <= 8);
+    sea::assume(len + len2 <= CAP);
 
     for _i in 0..len2 {
         v2.push(sea::nd_u32());
@@ -2374,163 +2268,150 @@ fn test_insert_from_slice() {
     let insert_point: usize = sea::nd_usize();
     sea::assume(insert_point < len);
 
-    v.insert_from_slice(insert_point, &v2);
+    v.insert_many(insert_point, v2.clone());
 
     sea::sassert!(v.len() == len + len2);
     sea::sassert!(v2.len() == len2);
-    sea::sassert!(v.capacity() == 8);
-    sea::sassert!(v2.capacity() == 8);
+    sea::sassert!(v.capacity() == CAP);
+    sea::sassert!(v2.capacity() == CAP);
+}
 
-    let insert_point2: usize = sea::nd_usize();
-    sea::assume(insert_point2 > len + len2);
+#[no_mangle]
+fn test_insert_many_panic() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
+    let mut v2: SmallVec<[u32; CAP]> = SmallVec::new();
 
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= CAP);
+
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
+
+    let len2: usize = sea::nd_usize();
+    sea::assume(len + len2 <= CAP);
+
+    for _i in 0..len2 {
+        v2.push(sea::nd_u32());
+    }
+
+    let insert_point: usize = sea::nd_usize();
+    sea::assume(insert_point > len + len2);
+    
     // Index is out of bounds so this should panic.
-    v.insert_from_slice(insert_point2, &v2);
+    v.insert_many(insert_point, v2.clone());
 
     // This assertion should not be reachable since the previous operation should panic.
     sea::sassert!(false);
 }
 
 #[no_mangle]
-fn test_new() {
-    let v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_new_const() {
-    let v: SmallVec<[u32; 8]> = SmallVec::new_const();
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_pop() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
+fn test_resize() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len > 0 && len <= 8);
+    sea::assume(len <= CAP);
 
     for _i in 0..len {
         v.push(sea::nd_u32());
     }
 
-    for i in 0..len {
-        v.pop();
-        sea::sassert!(v.len() == len - i - 1);
-    }
+    let resize_point: usize = sea::nd_usize();
+    sea::assume(resize_point <= CAP);
+    v.resize(resize_point, sea::nd_u32());
 
-    let result: Option<u32> = v.pop();
-    sea::sassert!(result.is_none());
+    sea::sassert!(v.len() == resize_point);
 }
 
 #[no_mangle]
-fn test_reserve() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap > 8);
-
-    v.reserve(new_cap);
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 16);
-}
-
-#[no_mangle]
-fn test_reserve_exact() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap >= 8 && new_cap <= 16);
-
-    v.reserve_exact(new_cap);
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == new_cap);
-}
-
-#[no_mangle]
-fn test_set_len() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
+fn test_resize2() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
 
     let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
+    sea::assume(len <= CAP);
 
-    unsafe {
-        v.set_len(len);
+    for _i in 0..len {
+        v.push(sea::nd_u32());
     }
+
+    let resize_point: usize = sea::nd_usize();
+    sea::assume(resize_point > CAP && resize_point <= 2*CAP);
+
+    v.resize(resize_point, sea::nd_u32());
+
+    sea::sassert!(v.len() == resize_point);
+}
+
+#[no_mangle]
+fn test_resize_with() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
+
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= CAP);
+
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
+
+    let resize_point: usize = sea::nd_usize();
+    sea::assume(resize_point <= CAP);
+    v.resize_with(resize_point, || sea::nd_u32());
+
+    sea::sassert!(v.len() == resize_point);
+}
+
+#[no_mangle]
+fn test_resize_with2() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
+
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= CAP);
+
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
+
+    let resize_point: usize = sea::nd_usize();
+    sea::assume(resize_point > CAP && resize_point <= 2*CAP);
+
+    v.resize_with(resize_point, || sea::nd_u32());
+
+    sea::sassert!(v.len() == resize_point);
+}
+
+#[no_mangle]
+fn test_shrink_to_fit() {
+    const CAP: usize = 2;
+    let mut v: SmallVec<[u32; CAP]> = SmallVec::new();
+
+    let len: usize = sea::nd_usize();
+    sea::assume(len <= CAP);
+ 
+    for _i in 0..len {
+        v.push(sea::nd_u32());
+    }
+
+    v.shrink_to_fit();
 
     sea::sassert!(v.len() == len);
-    sea::sassert!(v.capacity() == 8);
-}
+    sea::sassert!(v.capacity() == CAP);
 
-#[no_mangle]
-fn test_truncate() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let len: usize = sea::nd_usize();
-    sea::assume(len <= 8);
-
-    for _i in 0..len {
+    for _i in len..CAP + 1 {
         v.push(sea::nd_u32());
     }
 
-    let truncate_point: usize = sea::nd_usize();
-    sea::assume(truncate_point <= len);
+    sea::sassert!(v.len() == CAP + 1);
+    sea::sassert!(v.capacity() > CAP);
 
-    v.truncate(truncate_point);
+    v.pop();
 
-    sea::sassert!(v.len() == truncate_point);
-    sea::sassert!(v.capacity() == 8);
+    v.shrink_to_fit();
 
-    let truncate_point2: usize = sea::nd_usize();
-    sea::assume(truncate_point2 > truncate_point);
-
-    v.truncate(truncate_point2);
-
-    sea::sassert!(v.len() == truncate_point);
-    sea::sassert!(v.capacity() == 8);
-}
-
-#[no_mangle]
-fn test_try_reserve() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap > 8);
-
-    let result: Result<(), CollectionAllocErr> = v.try_reserve(new_cap);
-
-    sea::sassert!(result.is_ok());
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == 16);
-}
-
-#[no_mangle]
-fn test_try_reserve_exact() {
-    let mut v: SmallVec<[u32; 8]> = SmallVec::new();
-
-    let new_cap: usize = sea::nd_usize();
-    sea::assume(new_cap >= 8 && new_cap <= u16::MAX as usize);
-
-    let result: Result<(), CollectionAllocErr> = v.try_reserve_exact(new_cap);
-
-    sea::sassert!(result.is_ok());
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == new_cap);
-}
-
-#[no_mangle]
-fn test_with_capacity() {
-    let cap: usize = sea::nd_usize();
-    sea::assume(cap >= 8);
-
-    let v: SmallVec<[u32; 8]> = SmallVec::with_capacity(cap);
-
-    sea::sassert!(v.len() == 0);
-    sea::sassert!(v.capacity() == cap);
+    sea::sassert!(v.len() == CAP);
+    sea::sassert!(v.capacity() == CAP);
 }

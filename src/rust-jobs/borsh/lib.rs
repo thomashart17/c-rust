@@ -36,7 +36,7 @@ pub extern "C" fn entrypt() {
 
 
 
-
+// Issue: does not work, issues with bmcp() when string has more than 1 character
 #[no_mangle]
 fn test_string() {
     let x: String = "a".to_string();
@@ -72,6 +72,8 @@ fn test_string() {
 
 // #[no_mangle] extern "C" fn __rust_probestack () {}
 
+
+// Issue: does not work (probably in int bcmp() )
 #[no_mangle]
 fn test_fixed_sized_arrays() {
     let y: i32 = sea::nd_i32();
@@ -95,6 +97,7 @@ fn test_fixed_sized_arrays() {
     // sea::sassert!(x == decoded);
 }
 
+// Issue: does not work, TBD
 #[no_mangle]
 fn test_hashmap() {
     // use borsh::maybestd::collections::HashMap;

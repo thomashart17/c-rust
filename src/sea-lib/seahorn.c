@@ -74,7 +74,7 @@ INLINE int bcmp(const void *s1, const void *s2, size_t n) {
   #pragma unroll 32
   for (i = 0; i < max_buffer_size; i++) {
     if (i < n) {
-      if (p1[i] != p2[i] && p1[0] != '*') {
+      if (p1[i] != p2[i]) {
         return 1;
       }
     }

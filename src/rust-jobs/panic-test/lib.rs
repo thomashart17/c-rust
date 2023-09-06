@@ -14,6 +14,7 @@ use sea;
 #[no_mangle]
 pub extern "C" fn entrypt() {
     test();
+    sea::sassert!(true);
 }
 
 #[no_mangle]

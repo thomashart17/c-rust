@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdlib.h> // for free
 
+#define INLINE __attribute__((always_inline))
+
 void __VERIFIER_error(void) { return; }
 
 void __VERIFIER_assume(int i) { return; }
@@ -53,37 +55,35 @@ void *calloc(size_t elements, size_t size) {
 
 void *realloc(void *ptr, size_t sz) { return sea_realloc(ptr, sz); }
 
-// int bcmp(const void*s1, const void *s2, size_t n) { return 0; }
-
 void sea_printf( const char* format, ... ) { return; }
 
-int bcmp(const void *b1, const void *b2, register size_t length) {
-	char *p1, *p2;
-  p1 = (char *)b1;
-	p2 = (char *)b2;
-  sea_printf("", b1, *p1);
-  sea_printf("", b2, *p2);
+INLINE int bcmp(const void *s1, const void *s2, size_t n) {
+  size_t i;
 
-	if (length == 0)
-		return(0);
+  const size_t max_buffer_size = 32;
+  const uint8_t *p1;
+  const uint8_t *p2;
+  p1 = s1;
+  p2 = s2;
 
-  if (*p1 != *p2)
+  if (p1 == p2)
+    return 0;
+  if (p1 == NULL || p2 == NULL)
     return 1;
-  return 0;
-
-	// p1 = (char *)b1;
-	// p2 = (char *)b2;
-  // for (size_t i = 0; i < 16; i++) {
-  //   if (i >= length)
-  //     return 0;
+  /* pre-unroll the loop for MAX_BUFFER_SIZE */
+  #pragma unroll 32
+  for (i = 0; i < max_buffer_size; i++) {
+    if (i < n) {
+      if (p1[i] != p2[i] && p1[0] != '*') {
+        return 1;
+      }
+    }
+  }
+  /* unroll the rest, if any (doesn't really work) */
+  // for (i = max_buffer_size; i < n; i++) {
   //   if (p1[i] != p2[i])
   //     return 1;
   // }
-  // return 0;
-	// do {
-	// 	if (*p1++ != *p2++)
-	// 		break;
-  // } while (--length);
-	// return(length);
-}
 
+  return 0;
+}

@@ -25,6 +25,13 @@ pub extern "C" fn entrypt() {
     // test_fixed_sized_arrays();
     // test_hashmap();    
     // test_combinations();
+
+    // llvm script
+    // cont borsh
+    // example of non-overalaping
+    // to_string
+    // 
+
 }
 
 
@@ -32,14 +39,19 @@ pub extern "C" fn entrypt() {
 
 #[no_mangle]
 fn test_string() {
-    let x: String = "ab".to_string();
-    // sea::sassert!(x == "a".to_string());
+    let x: String = "a".to_string();
+    
+    let encoded: Vec<u8> = x.try_to_vec().unwrap();
+    let decoded: String = String::try_from_slice(&encoded).unwrap();
 
-    // let encoded: Vec<u8> = x.try_to_vec().unwrap();
-    // let decoded: String = String::try_from_slice(&encoded).unwrap();
+    sea::sassert!(x == decoded);
+    // sea::sassert!(false);
 
     // sea::sassert!(x.len() == decoded.len());
-    sea::sassert!(x == "ab".to_string());
+    // sea::sassert!(x == "asdf".to_string());
+    // sea::sassert!(false);
+    // sea::sassert!(false);
+
     // sea::sassert!(++)
     // sea::sassert!(
     //     match x.cmp(&decoded) {

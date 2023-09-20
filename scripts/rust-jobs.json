@@ -2,6 +2,10 @@
     "jobs": [
         "add",
         "borsh",
+        "borsh-enum",
+        "borsh-option",
+        "borsh-primitives",
+        "borsh-structs",
         "copy_stack_buffer",
         "custom-print",
         "custom-print-no-std",

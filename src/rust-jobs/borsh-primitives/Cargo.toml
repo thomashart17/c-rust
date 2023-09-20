@@ -1,7 +1,7 @@
 cargo-features = ["profile-rustflags"]
 
 [package]
-name = "borsh-lib"
+name = "borsh-primitives-lib"
 version = "0.1.0"
 edition = "2021"
 

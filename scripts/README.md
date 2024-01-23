@@ -5,7 +5,7 @@
 To simplify the process of creating a new verification job, the repository contains a script to generate all necessary files and to modify the correct CMake file. To create a new job with the script, run the following from the root project directory:
 
 ```bash
-./add-job <JOB_NAME>...
+./scripts/add-job <JOB_NAME>...
 ```
 
 Where `JOB_NAME` is the name of the job to add. Note that multiple jobs can be added at once.

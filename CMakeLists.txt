@@ -36,6 +36,7 @@ set(SEA_PP "${SEAHORN_ROOT}/bin/seapp" CACHE STRING "Path to seapp binary")
 
 set(LLVM_OBJCOPY "llvm-objcopy-14" CACHE STRING "Path to llvm-objcopy")
 set(LLVM_DIS "llvm-dis-14" CACHE STRING "Path to llvm-dis")
+set(LLD "lld-14" CACHE STRING "Path to lld")
 set(LLVM_NM ${DEFAULT_LLVM_NM} CACHE PATH "Path to llvm-nm")
 
 set(LLVMIR_LINK ${SEA_LINK})

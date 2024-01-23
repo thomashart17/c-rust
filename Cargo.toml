@@ -13,7 +13,7 @@ opt-level = 2
 rustflags = [
    "-Clinker-plugin-lto", 
    "-Clinker=clang-14",
-   "-Clink-arg=-fuse-ld=lld",
+   "-Clink-arg=-fuse-ld=lld-14",
    "-Zemit-thin-lto=no",
 ]
 
@@ -24,7 +24,7 @@ opt-level = 2
 rustflags = [
    "-Clinker-plugin-lto", 
    "-Clinker=clang-14",
-   "-Clink-arg=-fuse-ld=lld",
+   "-Clink-arg=-fuse-ld=lld-14",
    "-Zemit-thin-lto=no"
 ]
 

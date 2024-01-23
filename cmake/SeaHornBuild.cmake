@@ -79,7 +79,7 @@ function(c_rust_llvm TARGET SRC_FILES)
     # Still do optimization for the executable (XXX is this needed?)
     target_link_options(${TARGET} PUBLIC
         -flto
-        -fuse-ld=lld
+        -fuse-ld=${LLD}
         -Wl,--plugin-opt=-lto-embed-bitcode=post-merge-pre-opt
         --target=${ARCH}
         -O1

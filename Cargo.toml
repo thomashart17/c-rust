@@ -33,3 +33,6 @@ overflow-checks = false
 
 [profile.release.package.smallvec-drain-error-lib]
 overflow-checks = false
+
+[patch.crates-io]
+regex = { git = "https://github.com/rust-lang/regex.git", tag = "1.9.6" }
